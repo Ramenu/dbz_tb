@@ -5,7 +5,6 @@ import (
 	"io"
 	"io/ioutil"
 	"net/http"
-	"regexp"
 	"strconv"
 	"strings"
 )
@@ -21,6 +20,8 @@ func getPageTemplate(responseBody *io.ReadCloser) string {
 	return string(bytes)
 }
 
+// Returns true if the page actually contains anything
+// useful.
 func isValidPage(err error, responseBody string) bool {
 	emptyPage := strings.Contains(responseBody, "There is currently no text in this page.")
 	return !emptyPage
@@ -40,24 +41,37 @@ func updateURL(end *int, seriesNumber string) page {
 }
 
 func main() {
-	url := "https://dbz-dokkanbattle.fandom.com/wiki/All_Cards:_(1)001_to_(1)100"
-	response, err := http.Get(url)
-	page := page{url, response, err}
-	end := 100
-	responseBody := getPageTemplate(&page.response.Body)
-	fmt.Println(responseBody)
 
-	for isValidPage(err, responseBody){
-		
-		const nameReg = "<td><a href=\".*\" title=\"(.*)\">\\[.*\\].*</a>\\s</td>"
-		re := regexp.MustCompile(nameReg)
-		nameMatches := re.FindAllStringSubmatch(responseBody, -1)
-		for i := range nameMatches {
-			fmt.Println(nameMatches[i][1])
+	var allUnitNames []string
+	urls := [4]string{ 
+		"https://dbz-dokkanbattle.fandom.com/wiki/All_Cards:_(1)001_to_(1)100",
+		"https://dbz-dokkanbattle.fandom.com/wiki/All_Cards:_(2)001_to_(2)1000",
+		"https://dbz-dokkanbattle.fandom.com/wiki/All_Cards:_(3)001_to_(3)1000",
+		"https://dbz-dokkanbattle.fandom.com/wiki/All_Cards:_(4)001_to_(4)_unknown"}
+
+	for i := range urls {
+		response, err := http.Get(urls[i])
+		page := page{urls[i], response, err}
+		end := 100
+		responseBody := getPageTemplate(&page.response.Body)
+
+		for isValidPage(err, responseBody){
+			
+			nameRe := GetNameReg()
+			nameMatches := nameRe.FindAllStringSubmatch(responseBody, -1)
+			for i := range nameMatches {
+				// Only names are appended into the slice
+				if !strings.Contains(nameMatches[i][1], "Category:") && !strings.Contains(nameMatches[i][1], "img alt="){ 
+					allUnitNames = append(allUnitNames, fixHTMLSequences(nameMatches[i][1]))
+				}
+			}
+
+			page = updateURL(&end, strconv.Itoa(i))
+			responseBody = getPageTemplate(&page.response.Body)
 		}
+	}
 
-		page = updateURL(&end, "1")
-		responseBody = getPageTemplate(&page.response.Body)
-		fmt.Println("Next URL is: ", page.url)
+	for _, name := range allUnitNames {
+		fmt.Println(name)
 	}
 }
