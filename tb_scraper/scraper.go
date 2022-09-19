@@ -43,6 +43,7 @@ func updateURL(end *int, seriesNumber string) page {
 func main() {
 
 	var allUnitNames []string
+	var allRarityNames []string
 	urls := [4]string{ 
 		"https://dbz-dokkanbattle.fandom.com/wiki/All_Cards:_(1)001_to_(1)100",
 		"https://dbz-dokkanbattle.fandom.com/wiki/All_Cards:_(2)001_to_(2)1000",
@@ -57,13 +58,17 @@ func main() {
 
 		for isValidPage(err, responseBody){
 			
-			nameRe := GetNameReg()
-			nameMatches := nameRe.FindAllStringSubmatch(responseBody, -1)
+			nameMatches := GetNameReg().FindAllStringSubmatch(responseBody, -1)
+			rarityMatches := getRarityReg().FindAllStringSubmatch(responseBody, -1)
 			for i := range nameMatches {
-				// Only names are appended into the slice
-				if !strings.Contains(nameMatches[i][1], "Category:") && !strings.Contains(nameMatches[i][1], "img alt="){ 
+				// To ensure only names are appended into the slice
+				if !strings.Contains(nameMatches[i][1], "img alt="){ 
 					allUnitNames = append(allUnitNames, fixHTMLSequences(nameMatches[i][1]))
-				}
+				} 
+			}
+
+			for i := range rarityMatches {
+				allRarityNames = append(allRarityNames, rarityMatches[i][1])
 			}
 
 			page = updateURL(&end, strconv.Itoa(i))
@@ -71,7 +76,12 @@ func main() {
 		}
 	}
 
-	for _, name := range allUnitNames {
+	
+	/*for _, name := range allUnitNames {
 		fmt.Println(name)
+	}*/
+
+	for _, category := range allRarityNames {
+		fmt.Println(category)
 	}
 }
