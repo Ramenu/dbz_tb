@@ -10,7 +10,7 @@ const nameRegPattern = "<td><a href=\"(.*)\" title=\".*\">(.*)</a>"
 const rarityRegPattern = "<a href=\"/wiki/Category:[NRSUL]?[NSR]?[NR]\" title=\"Category:([NRSUL]?[NSR]?[NR])\">"
 const superAtkRegPattern = "(?s)<tr><td colspan=\"2\">(.*?)</td></tr>"
 const citationRegPattern = "\\[\\d\\]";
-const typeIconRegPattern = "<a href=\"/wiki/Category:[A-Z][A-Z][A-Z]\" title=\"Category:([A-Z][A-Z][A-Z])\">"
+const typeIconRegPattern = "<a href=\"\\/wiki\\/Category:\\w*_?[A-Z][A-Z][A-Z]\" title=\"Category:(\\w*? ?[A-Z][A-Z][A-Z])\">"
 
 var nameReg = regexp.MustCompile(nameRegPattern)
 var rarityReg = regexp.MustCompile(rarityRegPattern)

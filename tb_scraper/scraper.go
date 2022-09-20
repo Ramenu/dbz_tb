@@ -84,9 +84,13 @@ func main() {
 							if strings.Contains(infoResponseBody, "Before Z-Awakening") {
 								index = 2
 							}
+							leaderSkillMatch := removeHTMLTags(replaceHTMLTypeIcons(unitDescription[index - 1][1]))
 							saMatch := removeHTMLTags(unitDescription[index][1]) // This gets the super attack
 							passiveMatch := removeHTMLTags(replaceHTMLTypeIcons(unitDescription[index + 1][1])) // This gets the passive skill
-							fmt.Println("URL: ", fullInfoURL, "\nSuper attack: ", saMatch, "\nPassive skill: ", passiveMatch, "\n")
+							fmt.Println("URL: ", fullInfoURL, 
+										"\nLeader skill: ", leaderSkillMatch,
+							            "\nSuper attack: ", saMatch, 
+										"\nPassive skill: ", passiveMatch, "\n")
 						}
 					}
 
