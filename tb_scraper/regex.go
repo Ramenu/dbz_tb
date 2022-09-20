@@ -4,20 +4,33 @@ import (
 	"regexp"
 )
 
+
+const nameRegPattern = "<td><a href=\"(.*)\" title=\".*\">(.*)</a>"
+const rarityRegPattern = "<a href=\"/wiki/Category:[NRSUL]?[NSR]?[NR]\" title=\"Category:([NRSUL]?[NSR]?[NR])\">"
+const superAtkRegPattern = "(?s)<tr><td colspan=\"2\">(.*?)</td></tr>"
+const citationRegPattern = "\\[\\d\\]";
+
+var nameReg = regexp.MustCompile(nameRegPattern)
+var rarityReg = regexp.MustCompile(rarityRegPattern)
+var superAtkReg = regexp.MustCompile(superAtkRegPattern)
+var citationReg = regexp.MustCompile(citationRegPattern)
+
 func GetNameReg() *regexp.Regexp {
-	const nameReg = "<td><a href=\"(.*)\" title=\".*\">(.*)</a>"
-	return regexp.MustCompile(nameReg)
+	return nameReg
 }
 
 func GetRarityReg() *regexp.Regexp {
-	const categoryReg = "<a href=\"/wiki/Category:[NRSUL]?[NSR]?[NR]\" title=\"Category:([NRSUL]?[NSR]?[NR])\">"
-	return regexp.MustCompile(categoryReg)
+	return rarityReg
 }
 
 func GetSuperAtkReg() *regexp.Regexp {
-	const superAtkReg = "(?s)<tr><td colspan=\"2\">(.*?)</td></tr>"
-	return regexp.MustCompile(superAtkReg)
+	return superAtkReg
 }
+
+func GetCitationReg() *regexp.Regexp {
+	return citationReg
+}
+
 
 func replaceHTMLTypeIcons(s string) string {
 	return ""
