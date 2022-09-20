@@ -1,6 +1,8 @@
 package main
 
-import "regexp"
+import (
+	"regexp"
+)
 
 func GetNameReg() *regexp.Regexp {
 	const nameReg = "<td><a href=\"(.*)\" title=\".*\">(.*)</a>"
