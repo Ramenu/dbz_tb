@@ -85,7 +85,7 @@ func main() {
 								index = 2
 							}
 							saMatch := removeHTMLTags(unitDescription[index][1]) // This gets the super attack
-							passiveMatch := removeHTMLTags(unitDescription[index + 1][1]) // This gets the passive skill
+							passiveMatch := removeHTMLTags(replaceHTMLTypeIcons(unitDescription[index + 1][1])) // This gets the passive skill
 							fmt.Println("URL: ", fullInfoURL, "\nSuper attack: ", saMatch, "\nPassive skill: ", passiveMatch, "\n")
 						}
 					}
