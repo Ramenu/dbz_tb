@@ -47,9 +47,6 @@ func main() {
 
 	var allUnitNames []string
 	var allRarityNames []string
-	nameReg := GetNameReg()
-	rarityReg := GetRarityReg()
-	saReg := GetSuperAtkReg()
 	//var allSuperAttackNames []string
 	urls := [4]string{
 		"https://dbz-dokkanbattle.fandom.com/wiki/All_Cards:_(1)001_to_(1)100",
@@ -80,13 +77,16 @@ func main() {
 					if infoErr == nil {
 						infoResponseBody := getPageTemplate(&infoResponse.Body)
 						if isValidPage(infoResponseBody) {
-							unitDescription := saReg.FindAllStringSubmatch(infoResponseBody, -1)
+							unitDescription := GetSuperAtkReg().FindAllStringSubmatch(infoResponseBody, -1)
+							// Characters with z-awakening have different formatting on the wiki pages
+							// so the appropriate index has to be chosen
 							index := 1
 							if strings.Contains(infoResponseBody, "Before Z-Awakening") {
 								index = 2
 							}
-							saMatch := unitDescription[index][1] // This gets the super attack
-							fmt.Println("URL: ", fullInfoURL, "\nSuper attack: ", removeHTMLTags(saMatch), "\n")
+							saMatch := removeHTMLTags(unitDescription[index][1]) // This gets the super attack
+							passiveMatch := removeHTMLTags(unitDescription[index + 1][1]) // This gets the passive skill
+							fmt.Println("URL: ", fullInfoURL, "\nSuper attack: ", saMatch, "\nPassive skill: ", passiveMatch, "\n")
 						}
 					}
 
