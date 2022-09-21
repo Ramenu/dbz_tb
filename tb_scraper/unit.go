@@ -6,6 +6,7 @@ type Unit struct {
 	typ string
 	leaderSkill string
 	passiveSkill string
+	activeSkill string
 	superAtk string
 	atk uint
 	def uint

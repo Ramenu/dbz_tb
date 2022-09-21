@@ -46,6 +46,21 @@ func removeHTMLTags(s string) string {
 	if rePattern.MatchString(s) {
 		s = rePattern.ReplaceAllString(s, "")
 	}
-	return fixHTMLSequences(s)
+	return fixFormatting(fixHTMLSequences(s))
+}
+
+// Returns a string with the arbitrary 
+// formatting issues of the string
+// 's' removed.
+func fixFormatting(s string) string {
+	length := len(s)
+	for i := range s {
+		if s[i] == ';' && i + 1 < length {
+			if s[i + 1] != ' ' {
+				return s[:i] + " " + s[i+1:]
+			}
+		}
+	}
+	return s
 }
 
