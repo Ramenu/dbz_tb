@@ -60,11 +60,7 @@ func fixFormatting(s string) string {
 			if s[i + 1] != ' ' {
 				return s[:i] + " " + s[i+1:]
 			}
-		} /*else if i + 3 < length {
-			if s[i:i+2] == "or" && s[i+2:i+3] != " " {
-				return s[:i+2] + " " + s[:i+3]
-			}
-		}*/
+		} 
 	}
 	return s
 }

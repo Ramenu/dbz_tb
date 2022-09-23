@@ -77,6 +77,9 @@ func main() {
 							unitLeaderSkill := removeHTMLTags(replaceHTMLTypeIcons(GetLeaderSkillReg().FindStringSubmatch(infoResponseBody)[1]))
 							unitSa := removeHTMLTags(GetSuperAtkReg().FindStringSubmatch(infoResponseBody)[1])
 							unitPassiveSkill := removeHTMLTags(replaceHTMLTypeIcons(GetPassiveReg().FindStringSubmatch(infoResponseBody)[1]))
+							unitHP := removeHTMLTags(GetHPReg().FindStringSubmatch(infoResponseBody)[1])
+							unitATK := removeHTMLTags(GetATKReg().FindStringSubmatch(infoResponseBody)[1])
+							unitDEF := removeHTMLTags(GetDEFReg().FindStringSubmatch(infoResponseBody)[1])
 
 							// Some pages may not have a category for a profile or a type
 							if GetCategoryReg().MatchString(infoResponseBody) && GetTypeIconNoOptReg().MatchString(infoResponseBody) { 
@@ -117,7 +120,10 @@ func main() {
 								"\nUnit super attack activation conditions: ", unitUnitSAActivation,
 								"\nActive skill: ", unitActiveSkill,
 								"\nPassive skill: ", unitPassiveSkill,
-							    "\nCategories: ", unitCategories, "\n")
+							    "\nCategories: ", unitCategories,
+								"\nHP: ", unitHP, 
+								"\nATK: ", unitATK, 
+								"\nDEF: ", unitDEF, "\n")
 						}
 					}
 
