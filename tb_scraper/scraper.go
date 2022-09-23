@@ -71,7 +71,7 @@ func main() {
 						infoResponseBody := getPageTemplate(&infoResponse.Body)
 						if isValidPage(infoResponseBody) {
 
-							var unitCategories, unitType, unitUltraSa, unitUnitSA string
+							var unitCategories, unitType, unitUltraSa, unitUnitSA, unitUnitSAActivation, unitActiveSkill string
 							unitName := removeHTMLTags(GetNameReg().FindStringSubmatch(infoResponseBody)[1])
 							unitRarity := removeHTMLTags(GetRarityReg().FindStringSubmatch(infoResponseBody)[2])
 							unitLeaderSkill := removeHTMLTags(replaceHTMLTypeIcons(GetLeaderSkillReg().FindStringSubmatch(infoResponseBody)[1]))
@@ -90,6 +90,11 @@ func main() {
 
 							if strings.Contains(infoResponseBody, "Unit_SA") {
 								unitUnitSA = removeHTMLTags(GetUnitSuperAtkReg().FindStringSubmatch(infoResponseBody)[1])
+								unitUnitSAActivation = removeHTMLTags(GetUnitSAActivationReg().FindStringSubmatch(infoResponseBody)[1])
+							}
+
+							if strings.Contains(infoResponseBody, "Active_skill.png") {
+								unitActiveSkill = removeHTMLTags(GetActiveSkillReg().FindStringSubmatch(infoResponseBody)[1])
 							}
 							
 							fmt.Println("URL: ", fullInfoURL,
@@ -100,6 +105,8 @@ func main() {
 								"\nSuper attack: ", unitSa,
 								"\nUltra super attack: ", unitUltraSa,
 								"\nUnit super attack: ", unitUnitSA,
+								"\nUnit super attack activation conditions: ", unitUnitSAActivation,
+								"\nActive skill: ", unitActiveSkill,
 								"\nPassive skill: ", unitPassiveSkill,
 							    "\nCategories: ", unitCategories, "\n")
 						}

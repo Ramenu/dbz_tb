@@ -21,6 +21,12 @@ const passiveRegPattern = "(?s)Passive_skill\\.png.*?<tr>.*?<td colspan=\"2\">(.
 const categoryRegPattern = "(?s)Category\\.png.*?<tr>.*?<td colspan=\"2\">(.*?)</td>.*?</tr>"
 const nameRegPattern = "(?s)<center>.*?<b>(.*?)</center>.*?</td>.*?</tr>"
 
+// This pattern is meant to be appended to other patterns (just because the wiki can have a lot of these on the same page so more distinction is necessary)
+const activationRegPattern = "Activation_Condition\\.png.*?<tr><td colspan=\"2\"><center>(.*?)</center>" 
+const unitSAActivationRegPattern = "(?s)Super Attack Multipliers.*?" + activationRegPattern
+
+const activeSkillRegPattern = "(?s)Active_skill\\.png.*?<tr><td colspan=\"2\"><center>(.*?)</center>"
+
 var urlReg = regexp.MustCompile(urlRegPattern)
 var nameReg = regexp.MustCompile(nameRegPattern)
 var rarityReg = regexp.MustCompile(rarityRegPattern)
@@ -33,6 +39,8 @@ var typeIconReg = regexp.MustCompile(typeIconRegPattern)
 var passiveReg = regexp.MustCompile(passiveRegPattern)
 var categoryReg = regexp.MustCompile(categoryRegPattern)
 var typeIconNoOptReg = regexp.MustCompile(typeIconRegPatternNoOpt)
+var unitSAActivationReg = regexp.MustCompile(unitSAActivationRegPattern)
+var activeSkillReg = regexp.MustCompile(activeSkillRegPattern)
 
 func GetURLReg() *regexp.Regexp {
 	return urlReg
@@ -80,6 +88,14 @@ func GetPassiveReg() *regexp.Regexp {
 
 func GetCategoryReg() *regexp.Regexp {
 	return categoryReg
+}
+
+func GetUnitSAActivationReg() *regexp.Regexp {
+	return unitSAActivationReg
+}
+
+func GetActiveSkillReg() *regexp.Regexp {
+	return activeSkillReg
 }
 
 // Replaces the HTML type icons with the just the
