@@ -77,20 +77,18 @@ func main() {
 					if infoErr == nil {
 						infoResponseBody := getPageTemplate(&infoResponse.Body)
 						if isValidPage(infoResponseBody) {
-							unitDescription := GetSuperAtkReg().FindAllStringSubmatch(infoResponseBody, -1)
-							// Characters with z-awakening have different formatting on the wiki pages
-							// so the appropriate index has to be chosen
-							index := 1
-							if strings.Contains(infoResponseBody, "Before Z-Awakening") {
-								index = 2
-							}
-							leaderSkillMatch := removeHTMLTags(replaceHTMLTypeIcons(unitDescription[index - 1][1]))
-							saMatch := removeHTMLTags(unitDescription[index][1]) // This gets the super attack
-							passiveMatch := removeHTMLTags(replaceHTMLTypeIcons(unitDescription[index + 1][1])) // This gets the passive skill
-							fmt.Println("URL: ", fullInfoURL, 
-										"\nLeader skill: ", leaderSkillMatch,
-							            "\nSuper attack: ", saMatch, 
-										"\nPassive skill: ", passiveMatch, "\n")
+
+							unitLeaderSkill := GetLeaderSkillReg().FindStringSubmatch(infoResponseBody)[1]
+							unitSaMatch := GetSuperAtkReg().FindStringSubmatch(infoResponseBody)[1]
+							unitPassiveSkill := GetPassiveReg().FindStringSubmatch(infoResponseBody)[1]
+
+							leaderSkillMatch := removeHTMLTags(replaceHTMLTypeIcons(unitLeaderSkill)) 
+							saMatch := removeHTMLTags(unitSaMatch)                             
+							passiveMatch := removeHTMLTags(replaceHTMLTypeIcons(unitPassiveSkill))    
+							fmt.Println("URL: ", fullInfoURL,
+								"\nLeader skill: ", leaderSkillMatch,
+								"\nSuper attack: ", saMatch,
+								"\nPassive skill: ", passiveMatch, "\n")
 						}
 					}
 
