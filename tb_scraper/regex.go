@@ -9,6 +9,7 @@ const urlRegPattern = "<td><a href=\"(.*)\" title=\".*\">.*</a>"
 const rarityRegPattern = "<td>.*?(<center>|<span>)<a href=\"/wiki/Category:[NRSUL]?[SR]?R?\" title=\"Category:([NRSUL]?[SR]?R?)\">" // fix this?
 const leaderSkillRegPattern = "(?s)Leader_Skill\\.png.*?<tr>.*?<td colspan=\"2\">(.*?)</td>.*?</tr>"
 const superAtkRegPattern = "(?s)Super_atk\\.png.*?<tr>.*?<td colspan=\"2\">(.*?)</td>.*?</tr>"
+const ultraSuperAtkRegPattern = "(?s)Ultra_Super_atk\\.png.*?<tr>.*?<td colspan=\"2\">(.*?)</td>.*?</tr>"
 const citationRegPattern = "\\[\\d\\]"
 const typeIconRegPattern = "<a href=\"\\/wiki\\/Category:(Super|Extreme)?_?[ASPIT][GTHNE][LRYTQ]\" title=\"Category:((Super|Extreme)? ?[ASPIT][GTHNE][LRYTQ])\">"
 
@@ -24,6 +25,7 @@ var nameReg = regexp.MustCompile(nameRegPattern)
 var rarityReg = regexp.MustCompile(rarityRegPattern)
 var leaderSkillReg = regexp.MustCompile(leaderSkillRegPattern)
 var superAtkReg = regexp.MustCompile(superAtkRegPattern)
+var ultraSuperAtkReg = regexp.MustCompile(ultraSuperAtkRegPattern)
 var citationReg = regexp.MustCompile(citationRegPattern)
 var typeIconReg = regexp.MustCompile(typeIconRegPattern)
 var passiveReg = regexp.MustCompile(passiveRegPattern)
@@ -57,6 +59,10 @@ func GetLeaderSkillReg() *regexp.Regexp {
 
 func GetSuperAtkReg() *regexp.Regexp {
 	return superAtkReg
+}
+
+func GetUltraSuperAtkReg() *regexp.Regexp {
+	return ultraSuperAtkReg
 }
 
 func GetCitationReg() *regexp.Regexp {
