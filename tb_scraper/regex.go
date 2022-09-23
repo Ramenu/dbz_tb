@@ -6,7 +6,7 @@ import (
 )
 
 const urlRegPattern = "<td><a href=\"(.*)\" title=\".*\">.*</a>"
-const rarityRegPattern = "<a href=\"/wiki/Category:[NRSUL]?[NSR]?[NR]\" title=\"Category:([NRSUL]?[NSR]?[NR])\">" // fix this?
+const rarityRegPattern = "<td>.*?(<center>|<span>)<a href=\"/wiki/Category:[NRSUL]?[SR]?R?\" title=\"Category:([NRSUL]?[SR]?R?)\">" // fix this?
 const leaderSkillRegPattern = "(?s)Leader_Skill\\.png.*?<tr>.*?<td colspan=\"2\">(.*?)</td>.*?</tr>"
 const superAtkRegPattern = "(?s)Super_atk\\.png.*?<tr>.*?<td colspan=\"2\">(.*?)</td>.*?</tr>"
 const citationRegPattern = "\\[\\d\\]"

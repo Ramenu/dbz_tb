@@ -45,8 +45,6 @@ func updateURL(end *int, seriesNumber string) page {
 
 func main() {
 
-	var allRarityNames []string
-	//var allSuperAttackNames []string
 	urls := [4]string{
 		"https://dbz-dokkanbattle.fandom.com/wiki/All_Cards:_(1)001_to_(1)100",
 		"https://dbz-dokkanbattle.fandom.com/wiki/All_Cards:_(2)001_to_(2)1000",
@@ -62,11 +60,11 @@ func main() {
 		for isValidPage(responseBody) {
 
 			urlNameMatches := GetURLReg().FindAllStringSubmatch(responseBody, -1)
-			rarityMatches := rarityReg.FindAllStringSubmatch(responseBody, -1)
 			for i := range urlNameMatches {
 
-				// Get info from the character's wiki link
 				if !strings.Contains(urlNameMatches[i][1], "Category") {
+
+					// Get info from the character's wiki link
 					fullInfoURL := "https://dbz-dokkanbattle.fandom.com" + urlNameMatches[i][1]
 					infoResponse, infoErr := http.Get(fullInfoURL)
 					if infoErr == nil {
@@ -75,6 +73,7 @@ func main() {
 
 							var unitCategories string
 							unitName := removeHTMLTags(GetNameReg().FindStringSubmatch(infoResponseBody)[1])
+							unitRarity := removeHTMLTags(GetRarityReg().FindStringSubmatch(infoResponseBody)[2])
 							unitLeaderSkill := removeHTMLTags(replaceHTMLTypeIcons(GetLeaderSkillReg().FindStringSubmatch(infoResponseBody)[1]))
 							unitSa := removeHTMLTags(GetSuperAtkReg().FindStringSubmatch(infoResponseBody)[1])
 							unitPassiveSkill := removeHTMLTags(replaceHTMLTypeIcons(GetPassiveReg().FindStringSubmatch(infoResponseBody)[1]))
@@ -84,6 +83,7 @@ func main() {
 							
 							fmt.Println("URL: ", fullInfoURL,
 							    "\nName: ", unitName,
+								"\nRarity: ", unitRarity,
 								"\nLeader skill: ", unitLeaderSkill,
 								"\nSuper attack: ", unitSa,
 								"\nPassive skill: ", unitPassiveSkill,
@@ -94,20 +94,8 @@ func main() {
 				}
 			}
 
-			for i := range rarityMatches {
-				allRarityNames = append(allRarityNames, rarityMatches[i][1])
-			}
-
 			page = updateURL(&end, strconv.Itoa(i))
 			responseBody = getPageTemplate(&page.response.Body)
 		}
 	}
-
-	/*for _, name := range allUnitNames {
-		fmt.Println(name)
-	}*/
-
-	/*for _, category := range allRarityNames {
-		fmt.Println(category)
-	}*/
 }
