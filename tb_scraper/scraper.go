@@ -71,19 +71,23 @@ func main() {
 						infoResponseBody := getPageTemplate(&infoResponse.Body)
 						if isValidPage(infoResponseBody) {
 
-							var unitCategories string
+							var unitCategories, unitType string
 							unitName := removeHTMLTags(GetNameReg().FindStringSubmatch(infoResponseBody)[1])
 							unitRarity := removeHTMLTags(GetRarityReg().FindStringSubmatch(infoResponseBody)[2])
 							unitLeaderSkill := removeHTMLTags(replaceHTMLTypeIcons(GetLeaderSkillReg().FindStringSubmatch(infoResponseBody)[1]))
 							unitSa := removeHTMLTags(GetSuperAtkReg().FindStringSubmatch(infoResponseBody)[1])
 							unitPassiveSkill := removeHTMLTags(replaceHTMLTypeIcons(GetPassiveReg().FindStringSubmatch(infoResponseBody)[1]))
-							if GetCategoryReg().MatchString(infoResponseBody) { // Some pages may not have a category for a profile
+
+							// Some pages may not have a category for a profile or a type
+							if GetCategoryReg().MatchString(infoResponseBody) && GetTypeIconNoOptReg().MatchString(infoResponseBody) { 
 								unitCategories = removeHTMLTags(GetCategoryReg().FindStringSubmatch(infoResponseBody)[1])
+								unitType = removeHTMLTags(replaceHTMLTypeIcons(GetTypeIconNoOptReg().FindStringSubmatch(infoResponseBody)[2]))
 							} 
 							
 							fmt.Println("URL: ", fullInfoURL,
 							    "\nName: ", unitName,
 								"\nRarity: ", unitRarity,
+								"\nType: ", unitType,
 								"\nLeader skill: ", unitLeaderSkill,
 								"\nSuper attack: ", unitSa,
 								"\nPassive skill: ", unitPassiveSkill,

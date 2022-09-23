@@ -10,7 +10,11 @@ const rarityRegPattern = "<td>.*?(<center>|<span>)<a href=\"/wiki/Category:[NRSU
 const leaderSkillRegPattern = "(?s)Leader_Skill\\.png.*?<tr>.*?<td colspan=\"2\">(.*?)</td>.*?</tr>"
 const superAtkRegPattern = "(?s)Super_atk\\.png.*?<tr>.*?<td colspan=\"2\">(.*?)</td>.*?</tr>"
 const citationRegPattern = "\\[\\d\\]"
-const typeIconRegPattern = "<a href=\"\\/wiki\\/Category:\\w*_?[A-Z][A-Z][A-Z]\" title=\"Category:(\\w*? ?[A-Z][A-Z][A-Z])\">"
+const typeIconRegPattern = "<a href=\"\\/wiki\\/Category:(Super|Extreme)?_?[ASPIT][GTHNE][LRYTQ]\" title=\"Category:((Super|Extreme)? ?[ASPIT][GTHNE][LRYTQ])\">"
+
+// This is equivalant to the regular type icon reg pattern, but SUPER or EXTREME is necessary in the type
+const typeIconRegPatternNoOpt = "<a href=\"\\/wiki\\/Category:(Super|Extreme)_[ASPIT][GTHNE][LRYTQ]\" title=\"Category:((Super|Extreme) [ASPIT][GTHNE][LRYTQ])\">"
+
 const passiveRegPattern = "(?s)Passive_skill\\.png.*?<tr>.*?<td colspan=\"2\">(.*?)</td>.*?</tr>"
 const categoryRegPattern = "(?s)Category\\.png.*?<tr>.*?<td colspan=\"2\">(.*?)</td>.*?</tr>"
 const nameRegPattern = "(?s)<center>.*?<b>(.*?)</center>.*?</td>.*?</tr>"
@@ -24,6 +28,7 @@ var citationReg = regexp.MustCompile(citationRegPattern)
 var typeIconReg = regexp.MustCompile(typeIconRegPattern)
 var passiveReg = regexp.MustCompile(passiveRegPattern)
 var categoryReg = regexp.MustCompile(categoryRegPattern)
+var typeIconNoOptReg = regexp.MustCompile(typeIconRegPatternNoOpt)
 
 func GetURLReg() *regexp.Regexp {
 	return urlReg
@@ -36,6 +41,15 @@ func GetNameReg() *regexp.Regexp {
 func GetRarityReg() *regexp.Regexp {
 	return rarityReg
 }
+
+func GetTypeIconReg() *regexp.Regexp {
+	return typeIconReg
+}
+
+func GetTypeIconNoOptReg() *regexp.Regexp {
+	return typeIconNoOptReg
+}
+
 
 func GetLeaderSkillReg() *regexp.Regexp {
 	return leaderSkillReg
@@ -65,7 +79,7 @@ func replaceHTMLTypeIcons(s string) string {
 		for _, typ := range types {
 			found := typeIconReg.FindString(s)
 			if found != "" {
-				s = strings.Replace(s, found, typ[1], 1)
+				s = strings.Replace(s, found, typ[2], 1)
 			}
 		}
 	}
