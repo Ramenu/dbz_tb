@@ -78,17 +78,23 @@ func main() {
 						infoResponseBody := getPageTemplate(&infoResponse.Body)
 						if isValidPage(infoResponseBody) {
 
+							var unitCategories string
 							unitLeaderSkill := GetLeaderSkillReg().FindStringSubmatch(infoResponseBody)[1]
 							unitSaMatch := GetSuperAtkReg().FindStringSubmatch(infoResponseBody)[1]
 							unitPassiveSkill := GetPassiveReg().FindStringSubmatch(infoResponseBody)[1]
+							if GetCategoryReg().MatchString(infoResponseBody) { // Some pages may not have a category for a profile
+								unitCategories = GetCategoryReg().FindStringSubmatch(infoResponseBody)[1]
+							} 
 
 							leaderSkillMatch := removeHTMLTags(replaceHTMLTypeIcons(unitLeaderSkill)) 
 							saMatch := removeHTMLTags(unitSaMatch)                             
-							passiveMatch := removeHTMLTags(replaceHTMLTypeIcons(unitPassiveSkill))    
+							passiveMatch := removeHTMLTags(replaceHTMLTypeIcons(unitPassiveSkill)) 
+							categoriesMatch := removeHTMLTags(unitCategories)
 							fmt.Println("URL: ", fullInfoURL,
 								"\nLeader skill: ", leaderSkillMatch,
 								"\nSuper attack: ", saMatch,
-								"\nPassive skill: ", passiveMatch, "\n")
+								"\nPassive skill: ", passiveMatch,
+							    "\nCategories: ", categoriesMatch, "\n")
 						}
 					}
 

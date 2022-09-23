@@ -12,6 +12,7 @@ const superAtkRegPattern = "(?s)Super_atk\\.png.*?<tr>.*?<td colspan=\"2\">(.*?)
 const citationRegPattern = "\\[\\d\\]"
 const typeIconRegPattern = "<a href=\"\\/wiki\\/Category:\\w*_?[A-Z][A-Z][A-Z]\" title=\"Category:(\\w*? ?[A-Z][A-Z][A-Z])\">"
 const passiveRegPattern = "(?s)Passive_skill\\.png.*?<tr>.*?<td colspan=\"2\">(.*?)</td>.*?</tr>"
+const categoryRegPattern = "(?s)Category\\.png.*?<tr>.*?<td colspan=\"2\">(.*?)</td>.*?</tr>"
 
 var nameReg = regexp.MustCompile(nameRegPattern)
 var rarityReg = regexp.MustCompile(rarityRegPattern)
@@ -20,6 +21,7 @@ var superAtkReg = regexp.MustCompile(superAtkRegPattern)
 var citationReg = regexp.MustCompile(citationRegPattern)
 var typeIconReg = regexp.MustCompile(typeIconRegPattern)
 var passiveReg = regexp.MustCompile(passiveRegPattern)
+var categoryReg = regexp.MustCompile(categoryRegPattern)
 
 func GetNameReg() *regexp.Regexp {
 	return nameReg
@@ -43,6 +45,10 @@ func GetCitationReg() *regexp.Regexp {
 
 func GetPassiveReg() *regexp.Regexp {
 	return passiveReg
+}
+
+func GetCategoryReg() *regexp.Regexp {
+	return categoryReg
 }
 
 // Replaces the HTML type icons with the just the
