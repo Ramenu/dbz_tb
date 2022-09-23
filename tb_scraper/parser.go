@@ -42,6 +42,7 @@ func fixHTMLSequences(s string) string {
 // Returns a string with the HTML tags stripped
 // (also fixes HTML character junk).
 func removeHTMLTags(s string) string {
+	s = strings.Replace(s, "<br />", " ", -1)
 	s = policy.Sanitize(s)
 	if rePattern.MatchString(s) {
 		s = rePattern.ReplaceAllString(s, "")

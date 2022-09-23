@@ -45,7 +45,6 @@ func updateURL(end *int, seriesNumber string) page {
 
 func main() {
 
-	var allUnitNames []string
 	var allRarityNames []string
 	//var allSuperAttackNames []string
 	urls := [4]string{
@@ -62,15 +61,11 @@ func main() {
 
 		for isValidPage(responseBody) {
 
-			urlNameMatches := nameReg.FindAllStringSubmatch(responseBody, -1)
+			urlNameMatches := GetURLReg().FindAllStringSubmatch(responseBody, -1)
 			rarityMatches := rarityReg.FindAllStringSubmatch(responseBody, -1)
 			for i := range urlNameMatches {
-				// To ensure only names are appended into the slice
-				if !strings.Contains(urlNameMatches[i][2], "img alt=") {
-					allUnitNames = append(allUnitNames, fixHTMLSequences(urlNameMatches[i][2]))
-				}
 
-				// Get the other info from the character's wiki link
+				// Get info from the character's wiki link
 				if !strings.Contains(urlNameMatches[i][1], "Category") {
 					fullInfoURL := "https://dbz-dokkanbattle.fandom.com" + urlNameMatches[i][1]
 					infoResponse, infoErr := http.Get(fullInfoURL)
@@ -79,22 +74,20 @@ func main() {
 						if isValidPage(infoResponseBody) {
 
 							var unitCategories string
-							unitLeaderSkill := GetLeaderSkillReg().FindStringSubmatch(infoResponseBody)[1]
-							unitSaMatch := GetSuperAtkReg().FindStringSubmatch(infoResponseBody)[1]
-							unitPassiveSkill := GetPassiveReg().FindStringSubmatch(infoResponseBody)[1]
+							unitName := removeHTMLTags(GetNameReg().FindStringSubmatch(infoResponseBody)[1])
+							unitLeaderSkill := removeHTMLTags(replaceHTMLTypeIcons(GetLeaderSkillReg().FindStringSubmatch(infoResponseBody)[1]))
+							unitSa := removeHTMLTags(GetSuperAtkReg().FindStringSubmatch(infoResponseBody)[1])
+							unitPassiveSkill := removeHTMLTags(replaceHTMLTypeIcons(GetPassiveReg().FindStringSubmatch(infoResponseBody)[1]))
 							if GetCategoryReg().MatchString(infoResponseBody) { // Some pages may not have a category for a profile
-								unitCategories = GetCategoryReg().FindStringSubmatch(infoResponseBody)[1]
+								unitCategories = removeHTMLTags(GetCategoryReg().FindStringSubmatch(infoResponseBody)[1])
 							} 
-
-							leaderSkillMatch := removeHTMLTags(replaceHTMLTypeIcons(unitLeaderSkill)) 
-							saMatch := removeHTMLTags(unitSaMatch)                             
-							passiveMatch := removeHTMLTags(replaceHTMLTypeIcons(unitPassiveSkill)) 
-							categoriesMatch := removeHTMLTags(unitCategories)
+							
 							fmt.Println("URL: ", fullInfoURL,
-								"\nLeader skill: ", leaderSkillMatch,
-								"\nSuper attack: ", saMatch,
-								"\nPassive skill: ", passiveMatch,
-							    "\nCategories: ", categoriesMatch, "\n")
+							    "\nName: ", unitName,
+								"\nLeader skill: ", unitLeaderSkill,
+								"\nSuper attack: ", unitSa,
+								"\nPassive skill: ", unitPassiveSkill,
+							    "\nCategories: ", unitCategories, "\n")
 						}
 					}
 

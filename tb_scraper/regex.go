@@ -5,7 +5,7 @@ import (
 	"strings"
 )
 
-const nameRegPattern = "<td><a href=\"(.*)\" title=\".*\">(.*)</a>"
+const urlRegPattern = "<td><a href=\"(.*)\" title=\".*\">.*</a>"
 const rarityRegPattern = "<a href=\"/wiki/Category:[NRSUL]?[NSR]?[NR]\" title=\"Category:([NRSUL]?[NSR]?[NR])\">" // fix this?
 const leaderSkillRegPattern = "(?s)Leader_Skill\\.png.*?<tr>.*?<td colspan=\"2\">(.*?)</td>.*?</tr>"
 const superAtkRegPattern = "(?s)Super_atk\\.png.*?<tr>.*?<td colspan=\"2\">(.*?)</td>.*?</tr>"
@@ -13,7 +13,9 @@ const citationRegPattern = "\\[\\d\\]"
 const typeIconRegPattern = "<a href=\"\\/wiki\\/Category:\\w*_?[A-Z][A-Z][A-Z]\" title=\"Category:(\\w*? ?[A-Z][A-Z][A-Z])\">"
 const passiveRegPattern = "(?s)Passive_skill\\.png.*?<tr>.*?<td colspan=\"2\">(.*?)</td>.*?</tr>"
 const categoryRegPattern = "(?s)Category\\.png.*?<tr>.*?<td colspan=\"2\">(.*?)</td>.*?</tr>"
+const nameRegPattern = "(?s)<center>.*?<b>(.*?)</center>.*?</td>.*?</tr>"
 
+var urlReg = regexp.MustCompile(urlRegPattern)
 var nameReg = regexp.MustCompile(nameRegPattern)
 var rarityReg = regexp.MustCompile(rarityRegPattern)
 var leaderSkillReg = regexp.MustCompile(leaderSkillRegPattern)
@@ -22,6 +24,10 @@ var citationReg = regexp.MustCompile(citationRegPattern)
 var typeIconReg = regexp.MustCompile(typeIconRegPattern)
 var passiveReg = regexp.MustCompile(passiveRegPattern)
 var categoryReg = regexp.MustCompile(categoryRegPattern)
+
+func GetURLReg() *regexp.Regexp {
+	return urlReg
+}
 
 func GetNameReg() *regexp.Regexp {
 	return nameReg
