@@ -96,6 +96,15 @@ func main() {
 							if strings.Contains(infoResponseBody, "Active_skill.png") {
 								unitActiveSkill = removeHTMLTags(GetActiveSkillReg().FindStringSubmatch(infoResponseBody)[1])
 							}
+
+							if GetUnitActiveSkillConditionReg().MatchString(infoResponseBody) { // SIGH (thanks guys)
+								unitActiveCondition := removeHTMLTags(GetUnitActiveSkillConditionReg().FindStringSubmatch(infoResponseBody)[1])
+								if unitActiveSkill == "" {
+									unitActiveSkill = unitActiveCondition
+								} else {
+									unitActiveSkill += "; " + unitActiveCondition 
+								}
+							}
 							
 							fmt.Println("URL: ", fullInfoURL,
 							    "\nName: ", unitName,

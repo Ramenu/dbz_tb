@@ -27,6 +27,10 @@ const unitSAActivationRegPattern = "(?s)Super Attack Multipliers.*?" + activatio
 
 const activeSkillRegPattern = "(?s)Active_skill\\.png.*?<tr><td colspan=\"2\"><center>(.*?)</center>"
 
+// Some pages have the active skill condition inside the active skill itself, while some dont (annoying but whatever) this regex is for the condition being
+// outside the active skill
+const activeSkillRegPatternCondition = "(?s)Active Skills.*?" + activationRegPattern
+
 var urlReg = regexp.MustCompile(urlRegPattern)
 var nameReg = regexp.MustCompile(nameRegPattern)
 var rarityReg = regexp.MustCompile(rarityRegPattern)
@@ -41,6 +45,7 @@ var categoryReg = regexp.MustCompile(categoryRegPattern)
 var typeIconNoOptReg = regexp.MustCompile(typeIconRegPatternNoOpt)
 var unitSAActivationReg = regexp.MustCompile(unitSAActivationRegPattern)
 var activeSkillReg = regexp.MustCompile(activeSkillRegPattern)
+var activeSkillConditionReg = regexp.MustCompile(activeSkillRegPatternCondition)
 
 func GetURLReg() *regexp.Regexp {
 	return urlReg
@@ -96,6 +101,10 @@ func GetUnitSAActivationReg() *regexp.Regexp {
 
 func GetActiveSkillReg() *regexp.Regexp {
 	return activeSkillReg
+}
+
+func GetUnitActiveSkillConditionReg() *regexp.Regexp {
+	return activeSkillConditionReg
 }
 
 // Replaces the HTML type icons with the just the
