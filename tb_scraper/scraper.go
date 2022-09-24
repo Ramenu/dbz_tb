@@ -24,8 +24,7 @@ func getPageTemplate(responseBody *io.ReadCloser) string {
 // useful.
 func isValidPage(responseBody string) bool {
 	emptyPage := strings.Contains(responseBody, "There is currently no text in this page.")
-	invalidUnit := strings.Contains(responseBody, "This character is unreleased, you can only fight it as a boss") ||
-		strings.Contains(responseBody, "Wind-up Nutcracker")
+	invalidUnit := strings.Contains(responseBody, "This character is unreleased, you can only fight it as a boss")
 
 	return !emptyPage && !invalidUnit
 }
@@ -38,7 +37,6 @@ func updateURL(end *int, seriesNumber string) page {
 	*end += 100
 
 	newURL := "https://dbz-dokkanbattle.fandom.com/wiki/All_Cards:_(" + seriesNumber + ")" + newStart + "_to_(" + seriesNumber + ")" + strconv.Itoa(*end)
-
 	response, err := http.Get(newURL)
 	return page{newURL, response, err}
 }
@@ -62,7 +60,7 @@ func main() {
 			urlNameMatches := GetURLReg().FindAllStringSubmatch(responseBody, -1)
 			for i := range urlNameMatches {
 
-				if !strings.Contains(urlNameMatches[i][1], "Category") {
+				if !strings.Contains(urlNameMatches[i][1], "Category") && !strings.Contains(urlNameMatches[i][1], "Wind-up Nutcracker") {
 
 					// Get info from the character's wiki link
 					fullInfoURL := "https://dbz-dokkanbattle.fandom.com" + urlNameMatches[i][1]
@@ -82,10 +80,10 @@ func main() {
 							unitDEF := removeHTMLTags(GetDEFReg().FindStringSubmatch(infoResponseBody)[1])
 
 							// Some pages may not have a category for a profile or a type
-							if GetCategoryReg().MatchString(infoResponseBody) && GetTypeIconNoOptReg().MatchString(infoResponseBody) { 
+							if GetCategoryReg().MatchString(infoResponseBody) && GetTypeIconNoOptReg().MatchString(infoResponseBody) {
 								unitCategories = removeHTMLTags(GetCategoryReg().FindStringSubmatch(infoResponseBody)[1])
 								unitType = removeHTMLTags(replaceHTMLTypeIcons(GetTypeIconNoOptReg().FindStringSubmatch(infoResponseBody)[2]))
-							} 
+							}
 
 							if unitRarity == "LR" {
 								unitUltraSa = removeHTMLTags(GetUltraSuperAtkReg().FindStringSubmatch(infoResponseBody)[1])
@@ -105,12 +103,12 @@ func main() {
 								if unitActiveSkill == "" {
 									unitActiveSkill = unitActiveCondition
 								} else {
-									unitActiveSkill += "; " + unitActiveCondition 
+									unitActiveSkill += "; " + unitActiveCondition
 								}
 							}
-							
+
 							fmt.Println("URL: ", fullInfoURL,
-							    "\nName: ", unitName,
+								"\nName: ", unitName,
 								"\nRarity: ", unitRarity,
 								"\nType: ", unitType,
 								"\nLeader skill: ", unitLeaderSkill,
@@ -120,16 +118,14 @@ func main() {
 								"\nUnit super attack activation conditions: ", unitUnitSAActivation,
 								"\nActive skill: ", unitActiveSkill,
 								"\nPassive skill: ", unitPassiveSkill,
-							    "\nCategories: ", unitCategories,
-								"\nHP: ", unitHP, 
-								"\nATK: ", unitATK, 
+								"\nCategories: ", unitCategories,
+								"\nHP: ", unitHP,
+								"\nATK: ", unitATK,
 								"\nDEF: ", unitDEF, "\n")
 						}
 					}
-
 				}
 			}
-
 			page = updateURL(&end, strconv.Itoa(i))
 			responseBody = getPageTemplate(&page.response.Body)
 		}
