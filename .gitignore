@@ -3,14 +3,20 @@
 # dependencies
 /www/node_modules
 /www/.pnp
-/weww/.pnp.js
+/www/.pnp.js
+**/*.rs.bk
+/tb_parser/Cargo.lock
+/tb_parser/bin/
+/tb_parser/pkg/
+/tb_parser/wasm-pack.log
+/tb_parser/tests
 
 # testing
 /coverage
 /tb_scraper/tb_scraper
 /tb_scraper/*.txt
 /tb_scraper/*.json
-/test.go
+/tb_parser/target
 
 # production
 /build
