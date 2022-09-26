@@ -8,20 +8,20 @@ import (
 )
 
 type Unit struct {
-	name string
-	rarity string
-	typ string
-	leaderSkill string
-	passiveSkill string
-	activeSkill string
-	superAtk string
-	ultraSuperAtk string
-	unitSuperAtk string
-	unitSuperAtkCondition string
-	categories []string
-	atk uint
-	def uint
-	hp uint
+	Name string `json:"Name"`
+	Rarity string `json:"Rarity"`
+	Typ string `json:"Type"`
+	LeaderSkill string `json:"Leader Skill"`
+	PassiveSkill string `json:"Passive Skill"`
+	ActiveSkill string `json:"Active Skill"`
+	SuperAtk string `json:"Super attack"`
+	UltraSuperAtk string `json:"Ultra Super Attack"`
+	UnitSuperAtk string `json:"Unit Super Attack"`
+	UnitSuperAtkCondition string `json:"Unit Super Attack Condition"`
+	Categories []string `json:"Categories"`
+	Atk uint `json:"ATK"`
+	Def uint `json:"DEF"`
+	Hp uint `json:"HP"`
 }
 
 // Returns an array of all the units found on the
@@ -81,20 +81,20 @@ func GetAllInfoOnUnits(page *page) []Unit {
 					}
 
 					units = append(units, Unit{
-								   name: unitName,
-								   rarity: unitRarity,
-								   typ: unitType,
-								   leaderSkill: unitLeaderSkill,
-								   passiveSkill: unitPassiveSkill,
-								   activeSkill: unitActiveSkill,
-								   superAtk: unitSa,
-								   ultraSuperAtk: unitUltraSa,
-								   unitSuperAtk: unitUnitSA,
-								   unitSuperAtkCondition: unitUnitSAActivation,
-								   categories: strings.Split(unitCategories, ", "),
-								   atk: uint(unitATK),
-								   def: uint(unitDEF),
-								   hp: uint(unitHP)})
+								   Name: unitName,
+								   Rarity: unitRarity,
+								   Typ: unitType,
+								   LeaderSkill: unitLeaderSkill,
+								   PassiveSkill: unitPassiveSkill,
+								   ActiveSkill: unitActiveSkill,
+								   SuperAtk: unitSa,
+								   UltraSuperAtk: unitUltraSa,
+								   UnitSuperAtk: unitUnitSA,
+								   UnitSuperAtkCondition: unitUnitSAActivation,
+								   Categories: strings.Split(unitCategories, ", "),
+								   Atk: uint(unitATK),
+								   Def: uint(unitDEF),
+								   Hp: uint(unitHP)})
 					
 				}
 			}
@@ -105,18 +105,18 @@ func GetAllInfoOnUnits(page *page) []Unit {
 }
 
 func (unit Unit) String() string {
-	return fmt.Sprint("\nName: ", unit.name,
-					   "\nRarity: ", unit.rarity,
-					   "\nType: ", unit.typ,
-					   "\nLeader skill: ", unit.leaderSkill,
-					   "\nSuper attack: ", unit.superAtk,
-					   "\nUltra super attack: ", unit.ultraSuperAtk,
-					   "\nUnit super attack: ", unit.unitSuperAtk,
-					   "\nUnit super attack activation conditions: ", unit.unitSuperAtkCondition,
-					   "\nActive skill: ", unit.activeSkill,
-					   "\nPassive skill: ", unit.passiveSkill,
-					   "\nCategories: ", unit.categories,
-					   "\nHP: ", unit.hp,
-					   "\nATK: ", unit.atk,
-					   "\nDEF: ", unit.def)
+	return fmt.Sprint("\nName: ", unit.Name,
+					   "\nRarity: ", unit.Rarity,
+					   "\nType: ", unit.Typ,
+					   "\nLeader skill: ", unit.LeaderSkill,
+					   "\nSuper attack: ", unit.SuperAtk,
+					   "\nUltra super attack: ", unit.UltraSuperAtk,
+					   "\nUnit super attack: ", unit.UnitSuperAtk,
+					   "\nUnit super attack activation conditions: ", unit.UnitSuperAtkCondition,
+					   "\nActive skill: ", unit.ActiveSkill,
+					   "\nPassive skill: ", unit.PassiveSkill,
+					   "\nCategories: ", unit.Categories,
+					   "\nHP: ", unit.Hp,
+					   "\nATK: ", unit.Atk,
+					   "\nDEF: ", unit.Def)
 }

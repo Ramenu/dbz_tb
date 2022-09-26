@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	"encoding/json"
 )
 
 type page struct {
@@ -15,7 +16,10 @@ type page struct {
 }
 
 func getPageTemplate(responseBody *io.ReadCloser) string {
-	bytes, _ := io.ReadAll(*responseBody)
+	bytes, err := io.ReadAll(*responseBody)
+	if err != nil {
+		fmt.Println(err)
+	}
 	return string(bytes)
 }
 
@@ -92,7 +96,11 @@ func main() {
 
 	for i := 0; i < length; i++ {
 		for _, unit := range <-unitList[i] {
-			fmt.Println(unit)
+			b, err := json.Marshal(unit)
+			if err != nil {
+				fmt.Println(err)
+			}
+			fmt.Println(string(b))
 		}
 	}
 
