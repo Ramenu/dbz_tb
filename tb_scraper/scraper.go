@@ -1,12 +1,12 @@
 package main
 
 import (
-	"fmt"
+	"encoding/json"
 	"io"
 	"net/http"
+	"os"
 	"strconv"
 	"strings"
-	"encoding/json"
 )
 
 type page struct {
@@ -15,11 +15,15 @@ type page struct {
 	err      error
 }
 
+func check(err error) {
+	if err != nil {
+		panic(err)
+	}
+}
+
 func getPageTemplate(responseBody *io.ReadCloser) string {
 	bytes, err := io.ReadAll(*responseBody)
-	if err != nil {
-		fmt.Println(err)
-	}
+	check(err)
 	return string(bytes)
 }
 
@@ -93,15 +97,31 @@ func main() {
 		unitList[i] = make(chan []Unit)
 		go getUnitsFromCharacterList(urls[i], unitList[i])
 	}
-
+	//listLength := 137
+	file, err := os.OpenFile("./units.json", os.O_WRONLY|os.O_TRUNC, os.ModeAppend)
+	check(err)
+	defer file.Close()
+	_, e := file.Write([]byte("[\n"))
+	check(e)
 	for i := 0; i < length; i++ {
-		for _, unit := range <-unitList[i] {
-			b, err := json.Marshal(unit)
-			if err != nil {
-				fmt.Println(err)
+		var n int
+		list := <-unitList[i]
+		// Ensure we only get the length when its necessary
+		if i + 1 == length {
+			n = len(list)
+		}
+		for j, unit := range list {
+			b, err := json.MarshalIndent(unit, "", " ")
+			check(err)
+			if i + 1 == length && j + 1 == n {
+				_, e = file.Write(b)
+			} else {
+				_, e = file.Write([]byte(string(b) + ",\n"))
 			}
-			fmt.Println(string(b))
+			check(e)
 		}
 	}
+	_, e = file.Write([]byte("\n]"))
+	check(e)
 
 }
