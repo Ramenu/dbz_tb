@@ -1,9 +1,9 @@
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
 # dependencies
-/web/node_modules
-/web/.pnp
-/web/.pnp.js
+/www/node_modules
+/www/.pnp
+/weww/.pnp.js
 
 # testing
 /coverage
@@ -18,15 +18,15 @@
 /tb_parser/target
 
 # misc
-/web/.DS_Store
-/web/.env.local
-/web/.env.development.local
-/web/.env.test.local
-/web/.env.production.local
+/www/.DS_Store
+/www/.env.local
+/www/.env.development.local
+/www/.env.test.local
+/www/.env.production.local
 
-/web/npm-debug.log*
-/web/yarn-debug.log*
-/web/yarn-error.log*
+/www/npm-debug.log*
+/www/yarn-debug.log*
+/www/yarn-error.log*
 
 
 # Added by cargo
