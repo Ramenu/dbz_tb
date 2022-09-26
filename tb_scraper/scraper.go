@@ -97,8 +97,7 @@ func main() {
 		unitList[i] = make(chan []Unit)
 		go getUnitsFromCharacterList(urls[i], unitList[i])
 	}
-	//listLength := 137
-	file, err := os.OpenFile("./units.json", os.O_WRONLY|os.O_TRUNC, os.ModeAppend)
+	file, err := os.Create("./units.json")
 	check(err)
 	defer file.Close()
 	_, e := file.Write([]byte("[\n"))
