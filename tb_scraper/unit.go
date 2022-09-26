@@ -8,20 +8,21 @@ import (
 )
 
 type Unit struct {
-	Name string `json:"Name"`
-	Rarity string `json:"Rarity"`
-	Typ string `json:"Type"`
-	LeaderSkill string `json:"Leader Skill"`
-	PassiveSkill string `json:"Passive Skill"`
-	ActiveSkill string `json:"Active Skill"`
-	SuperAtk string `json:"Super attack"`
-	UltraSuperAtk string `json:"Ultra Super Attack"`
-	UnitSuperAtk string `json:"Unit Super Attack"`
-	UnitSuperAtkCondition string `json:"Unit Super Attack Condition"`
-	Categories []string `json:"Categories"`
-	Atk uint `json:"ATK"`
-	Def uint `json:"DEF"`
-	Hp uint `json:"HP"`
+	Url string `json:"URL,omitempty"`
+	Name string `json:"Name,omitempty"`
+	Rarity string `json:"Rarity,omitempty"`
+	Typ string `json:"Type,omitempty"`
+	LeaderSkill string `json:"Leader Skill,omitempty"`
+	PassiveSkill string `json:"Passive Skill,omitempty"`
+	ActiveSkill string `json:"Active Skill,omitempty"`
+	SuperAtk string `json:"Super attack,omitempty"`
+	UltraSuperAtk string `json:"Ultra Super Attack,omitempty"`
+	UnitSuperAtk string `json:"Unit Super Attack,omitempty"`
+	UnitSuperAtkCondition string `json:"Unit Super Attack Condition,omitempty"`
+	Categories []string `json:"Categories,omitempty"`
+	Atk uint `json:"ATK,omitempty"`
+	Def uint `json:"DEF,omitempty"`
+	Hp uint `json:"HP,omitempty"`
 }
 
 // Returns an array of all the units found on the
@@ -81,6 +82,7 @@ func GetAllInfoOnUnits(page *page) []Unit {
 					}
 
 					units = append(units, Unit{
+								   Url: fullUnitURL,
 								   Name: unitName,
 								   Rarity: unitRarity,
 								   Typ: unitType,
@@ -91,7 +93,7 @@ func GetAllInfoOnUnits(page *page) []Unit {
 								   UltraSuperAtk: unitUltraSa,
 								   UnitSuperAtk: unitUnitSA,
 								   UnitSuperAtkCondition: unitUnitSAActivation,
-								   Categories: strings.Split(unitCategories, ", "),
+								   Categories: strings.Split(unitCategories, " - "),
 								   Atk: uint(unitATK),
 								   Def: uint(unitDEF),
 								   Hp: uint(unitHP)})
