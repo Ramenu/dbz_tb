@@ -3,6 +3,8 @@
 use regex::Regex;
 use lazy_static::lazy_static;
 use std::fmt;
+use std::collections::{hash_map, HashMap};
+use wasm_bindgen::prelude::*;
 
 pub enum Token 
 {
@@ -12,6 +14,17 @@ pub enum Token
     Number,
     Null
 }
+
+const CONDITIONAL : u32 = 0x0;
+const TYPE : u32 = 0x1;
+const STAT : u32 = 0x2;
+const OTHER : u32 = 0x4;
+const PERCENT : u32 = 0x8;
+const BUFF : u32 = 0x10; 
+const EFFECT : u32 = 0x20;
+const SKIP : u32 = 0x30;
+const NUM : u32 = 0x40;
+const NERF : u32 = 0x50;
 
 #[cfg(debug_assertions)]
 impl fmt::Display for Token 
@@ -62,9 +75,79 @@ pub fn get_binary_op(s : &str) -> Option<char>
     return None;
 }
 
+pub fn is_conditional_token(s : &str) -> bool {
+    return true;
+}
+
 
 pub fn get_token(s : &str) -> Token 
 {
+    lazy_static! 
+    {
+        static ref KEYWORD_TO_CATEGORIES : HashMap<&'static str, u32> = HashMap::from([
+            ("raises", OTHER),
+            ("atk", STAT),
+            ("def", STAT),
+            ("hp", STAT),
+            ("ki", STAT),
+            ("guard", STAT),
+            ("str", TYPE),
+            ("phy", TYPE),
+            ("int", TYPE),
+            ("teq", TYPE),
+            ("agl", TYPE),
+            ("if", CONDITIONAL),
+            ("when", CONDITIONAL),
+            ("or", CONDITIONAL),
+            ("only", CONDITIONAL),
+            ("upon", CONDITIONAL),
+            ("met", CONDITIONAL|OTHER),
+            ("and", CONDITIONAL|OTHER),
+            ("at", CONDITIONAL|OTHER),
+            ("for", CONDITIONAL|OTHER),
+            ("whose", CONDITIONAL), // Not really conditional, but in dokkan's case yes 
+            ("rare", PERCENT),
+            ("medium", PERCENT),
+            ("high", PERCENT),
+            ("great", PERCENT),
+            ("greatly", PERCENT),
+            ("every", PERCENT),
+            ("low", PERCENT), // Note that this is not specific to SA multipliers
+            ("chance", PERCENT),
+            ("huge", PERCENT), // Note that this is not specific to SA multipliers
+            // Below are exclusive to SA modifiers
+            ("damage", PERCENT),
+            ("huge", PERCENT),
+            ("destructive", PERCENT),
+            ("extreme", PERCENT),
+            ("mass", PERCENT),
+            ("supreme", PERCENT),
+            ("immense", PERCENT),
+            ("colossal", PERCENT),
+            ("mega-colossal", PERCENT),
+            // End of exclusive to SA modifiers
+            ("1st", OTHER),
+            ("2nd", OTHER),
+            ("3rd", OTHER),
+            ("first", OTHER),
+            ("second", OTHER),
+            ("third", OTHER),
+            ("increases", PERCENT|BUFF),
+            ("decreases", PERCENT|NERF),
+            ("increasing", BUFF),
+            ("decreasing", NERF),
+            ("stunning", EFFECT),
+            ("sealing", EFFECT),
+            ("stun", EFFECT),
+            ("seal", EFFECT),
+            ("a", SKIP),
+            ("facing", OTHER),
+            ("temporaily", NUM),
+
+
+        ]);
+
+    }
     let token: Token = match s.to_lowercase().as_str()
     {
         "raises" | "atk" | "def" | "hp" | "category" |
@@ -112,7 +195,6 @@ pub fn get_token(s : &str) -> Token
         "+" | "-" | "*" | "/" | ";" | "&" | ">" | "=" | "<" | "\"" | "%" => return Token::Op,
         _ => Token::Identifier
     };
-
     if String::from(s).parse::<i32>().is_ok() {
         return Token::Number;
     }
@@ -128,7 +210,8 @@ pub fn has_more_tokens(s : &str) -> bool {
 pub fn get_next_token(s : &mut String, advance : bool) -> Option<(String, Token)>
 {
     lazy_static! {
-        static ref RE : Regex = Regex::new(r"([^\s\W]*[\.']?[^\W][\.']?|[^\w\s])").expect("Failed to compile regex"); 
+        // Beware this regex is far from perfect at the moment
+        static ref RE : Regex = Regex::new(r"([^\s\W]*[^\W][-']?\w*|[^\w\s])").expect("Failed to compile regex"); 
     }
 
     if RE.is_match(s) 
