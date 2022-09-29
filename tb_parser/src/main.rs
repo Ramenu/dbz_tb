@@ -1,9 +1,10 @@
 mod tokenizer;
+mod sa;
 fn main() 
 {
     let mut s = String::from("ATK and DEF +120% at start of turn; Ki +2 in addition per  Ki Sphere obtained; perform Potara fusion when conditions are met");
     while tokenizer::has_more_tokens(&s) {
-        let token = tokenizer::get_next_token(&mut s, true).expect("No tokens remaining.");
-        println!("{}, token is: {}", token.0, token.1);
+        let tokens = tokenizer::get_n_tokens(&mut s, 4, true).expect("Not enough tokens");
+        println!("{}", tokens.0);
     }
 }
