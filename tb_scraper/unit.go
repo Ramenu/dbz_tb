@@ -19,6 +19,7 @@ type Unit struct {
 	UltraSuperAtk string `json:"Ultra Super Attack,omitempty"`
 	UnitSuperAtk string `json:"Unit Super Attack,omitempty"`
 	UnitSuperAtkCondition string `json:"Unit Super Attack Condition,omitempty"`
+	TransformationCondition string `json:"Transformation Condition,omitempty"`
 	Categories []string `json:"Categories,omitempty"`
 	Atk uint `json:"ATK,omitempty"`
 	Def uint `json:"DEF,omitempty"`
@@ -43,7 +44,7 @@ func GetAllInfoOnUnits(page *page) []Unit {
 				infoResponseBody := getPageTemplate(&infoResponse.Body)
 				if isValidResponse(infoResponseBody) {
 
-					var unitCategories, unitType, unitUltraSa, unitUnitSA, unitUnitSAActivation, unitActiveSkill string
+					var unitCategories, unitType, unitUltraSa, unitUnitSA, unitUnitSAActivation, unitActiveSkill, unitTransCondition string
 					unitName := removeHTMLTags(GetNameReg().FindStringSubmatch(infoResponseBody)[1])
 					unitRarity := removeHTMLTags(GetRarityReg().FindStringSubmatch(infoResponseBody)[2])
 					unitLeaderSkill := removeHTMLTags(replaceHTMLTypeIcons(GetLeaderSkillReg().FindStringSubmatch(infoResponseBody)[1]))
@@ -72,6 +73,10 @@ func GetAllInfoOnUnits(page *page) []Unit {
 						unitActiveSkill = removeHTMLTags(GetActiveSkillReg().FindStringSubmatch(infoResponseBody)[1])
 					}
 
+					if /*strings.Contains(infoResponseBody, "Transformation_Condition.png")*/ GetTransformationConditionReg().MatchString(infoResponseBody) {
+						unitTransCondition = removeHTMLTags(GetTransformationConditionReg().FindStringSubmatch(infoResponseBody)[1])
+					}
+
 					if GetUnitActiveSkillConditionReg().MatchString(infoResponseBody) { // SIGH (thanks guys)
 						unitActiveCondition := removeHTMLTags(GetUnitActiveSkillConditionReg().FindStringSubmatch(infoResponseBody)[1])
 						if unitActiveSkill == "" {
@@ -80,6 +85,7 @@ func GetAllInfoOnUnits(page *page) []Unit {
 							unitActiveSkill += "; " + unitActiveCondition
 						}
 					}
+
 
 					units = append(units, Unit{
 								   Url: fullUnitURL,
@@ -93,6 +99,7 @@ func GetAllInfoOnUnits(page *page) []Unit {
 								   UltraSuperAtk: unitUltraSa,
 								   UnitSuperAtk: unitUnitSA,
 								   UnitSuperAtkCondition: unitUnitSAActivation,
+								   TransformationCondition: unitTransCondition,
 								   Categories: strings.Split(unitCategories, " - "),
 								   Atk: uint(unitATK),
 								   Def: uint(unitDEF),

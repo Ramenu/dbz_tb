@@ -36,6 +36,8 @@ const hpRegPattern = "(?s)HP\\.png.*?" + statRegPattern
 const atkRegPattern = "(?s)Atk\\.png.*?" + statRegPattern
 const defRegPattern = "(?s)Def\\.png.*?" + statRegPattern
 
+const transformationConditionRegPattern = "(?s)Transformation_Condition\\.png.*?<tr><td colspan=\"2\"><center>(.*?)</center>"
+
 var urlReg = regexp.MustCompile(urlRegPattern)
 var nameReg = regexp.MustCompile(nameRegPattern)
 var rarityReg = regexp.MustCompile(rarityRegPattern)
@@ -54,6 +56,7 @@ var activeSkillConditionReg = regexp.MustCompile(activeSkillRegPatternCondition)
 var hpReg = regexp.MustCompile(hpRegPattern)
 var atkReg = regexp.MustCompile(atkRegPattern)
 var defReg = regexp.MustCompile(defRegPattern)
+var transformationConditionReg = regexp.MustCompile(transformationConditionRegPattern)
 
 func GetURLReg() *regexp.Regexp {
 	return urlReg
@@ -125,6 +128,10 @@ func GetATKReg() *regexp.Regexp {
 
 func GetDEFReg() *regexp.Regexp {
 	return defReg
+}
+
+func GetTransformationConditionReg() *regexp.Regexp {
+	return transformationConditionReg
 }
 
 // Replaces the HTML type icons with the just the
