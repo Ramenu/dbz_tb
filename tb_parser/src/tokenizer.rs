@@ -15,16 +15,16 @@ pub enum Token
     Null
 }
 
-const CONDITIONAL : u32 = 0x0;
-const TYPE : u32 = 0x1;
-const STAT : u32 = 0x2;
-const OTHER : u32 = 0x4;
-const PERCENT : u32 = 0x8;
-const BUFF : u32 = 0x10; 
-const EFFECT : u32 = 0x20;
-const SKIP : u32 = 0x30;
-const NUM : u32 = 0x40;
-const NERF : u32 = 0x50;
+pub const CONDITIONAL : u32 = 0x0;
+pub const TYPE : u32 = 0x1;
+pub const STAT : u32 = 0x2;
+pub const OTHER : u32 = 0x4;
+pub const PERCENT : u32 = 0x8;
+pub const BUFF : u32 = 0x10; 
+pub const EFFECT : u32 = 0x20;
+pub const SKIP : u32 = 0x30;
+pub const NUM : u32 = 0x40;
+pub const NERF : u32 = 0x50;
 
 #[cfg(debug_assertions)]
 impl fmt::Display for Token 
@@ -97,6 +97,7 @@ pub fn get_token(s : &str) -> Token
             ("teq", TYPE),
             ("agl", TYPE),
             ("if", CONDITIONAL),
+            ("after", CONDITIONAL),
             ("when", CONDITIONAL),
             ("or", CONDITIONAL),
             ("only", CONDITIONAL),
@@ -136,12 +137,17 @@ pub fn get_token(s : &str) -> Token
             ("decreases", PERCENT|NERF),
             ("increasing", BUFF),
             ("decreasing", NERF),
+            ("raises", BUFF),
+            ("decreases", NERF),
             ("stunning", EFFECT),
             ("sealing", EFFECT),
             ("stun", EFFECT),
             ("seal", EFFECT),
             ("a", SKIP),
+            ("an", SKIP),
             ("facing", OTHER),
+            ("performing", OTHER),
+            ("launches", OTHER),
             ("temporaily", NUM),
 
 
