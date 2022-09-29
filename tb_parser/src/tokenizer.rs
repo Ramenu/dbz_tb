@@ -6,6 +6,7 @@ use std::fmt;
 use std::collections::{hash_map, HashMap};
 use wasm_bindgen::prelude::*;
 
+#[derive(Clone)]
 pub enum Token 
 {
     Op,
@@ -15,16 +16,14 @@ pub enum Token
     Null
 }
 
-pub const CONDITIONAL : u32 = 0x0;
+lazy_static! {
+    // Beware this regex is far from perfect at the moment
+    static ref RE : Regex = Regex::new(r"([^\s\W]*[^\W][-']?\w*|[^\w\s])").expect("Failed to compile regex"); 
+    static ref SPACE_STR : String = String::from(" ");
+}
+
 pub const TYPE : u32 = 0x1;
 pub const STAT : u32 = 0x2;
-pub const OTHER : u32 = 0x4;
-pub const PERCENT : u32 = 0x8;
-pub const BUFF : u32 = 0x10; 
-pub const EFFECT : u32 = 0x20;
-pub const SKIP : u32 = 0x30;
-pub const NUM : u32 = 0x40;
-pub const NERF : u32 = 0x50;
 
 #[cfg(debug_assertions)]
 impl fmt::Display for Token 
@@ -85,72 +84,15 @@ pub fn get_token(s : &str) -> Token
     lazy_static! 
     {
         static ref KEYWORD_TO_CATEGORIES : HashMap<&'static str, u32> = HashMap::from([
-            ("raises", OTHER),
             ("atk", STAT),
             ("def", STAT),
             ("hp", STAT),
             ("ki", STAT),
-            ("guard", STAT),
             ("str", TYPE),
             ("phy", TYPE),
             ("int", TYPE),
             ("teq", TYPE),
             ("agl", TYPE),
-            ("if", CONDITIONAL),
-            ("after", CONDITIONAL),
-            ("when", CONDITIONAL),
-            ("or", CONDITIONAL),
-            ("only", CONDITIONAL),
-            ("upon", CONDITIONAL),
-            ("met", CONDITIONAL|OTHER),
-            ("and", CONDITIONAL|OTHER),
-            ("at", CONDITIONAL|OTHER),
-            ("for", CONDITIONAL|OTHER),
-            ("whose", CONDITIONAL), // Not really conditional, but in dokkan's case yes 
-            ("rare", PERCENT),
-            ("medium", PERCENT),
-            ("high", PERCENT),
-            ("great", PERCENT),
-            ("greatly", PERCENT),
-            ("every", PERCENT),
-            ("low", PERCENT), // Note that this is not specific to SA multipliers
-            ("chance", PERCENT),
-            ("huge", PERCENT), // Note that this is not specific to SA multipliers
-            // Below are exclusive to SA modifiers
-            ("damage", PERCENT),
-            ("huge", PERCENT),
-            ("destructive", PERCENT),
-            ("extreme", PERCENT),
-            ("mass", PERCENT),
-            ("supreme", PERCENT),
-            ("immense", PERCENT),
-            ("colossal", PERCENT),
-            ("mega-colossal", PERCENT),
-            // End of exclusive to SA modifiers
-            ("1st", OTHER),
-            ("2nd", OTHER),
-            ("3rd", OTHER),
-            ("first", OTHER),
-            ("second", OTHER),
-            ("third", OTHER),
-            ("increases", PERCENT|BUFF),
-            ("decreases", PERCENT|NERF),
-            ("increasing", BUFF),
-            ("decreasing", NERF),
-            ("raises", BUFF),
-            ("decreases", NERF),
-            ("stunning", EFFECT),
-            ("sealing", EFFECT),
-            ("stun", EFFECT),
-            ("seal", EFFECT),
-            ("a", SKIP),
-            ("an", SKIP),
-            ("facing", OTHER),
-            ("performing", OTHER),
-            ("launches", OTHER),
-            ("temporaily", NUM),
-
-
         ]);
 
     }
@@ -215,19 +157,42 @@ pub fn has_more_tokens(s : &str) -> bool {
 
 pub fn get_next_token(s : &mut String, advance : bool) -> Option<(String, Token)>
 {
-    lazy_static! {
-        // Beware this regex is far from perfect at the moment
-        static ref RE : Regex = Regex::new(r"([^\s\W]*[^\W][-']?\w*|[^\w\s])").expect("Failed to compile regex"); 
-    }
-
-    if RE.is_match(s) 
+    if has_more_tokens(&s)
     {
-        let found = RE.find(&s).expect("Unable to find match in string").as_str().to_string();
-        let token = get_token(&found);
-        if advance {
-            *s = RE.replace(s, "").to_string();
+
+        if RE.is_match(s) 
+        {
+            let found = RE.find(&s).expect("Unable to find match in string").as_str().to_string();
+            let token = get_token(&found);
+            if advance {
+                *s = RE.replace(s, "").to_string();
+            }
+            return Some((found, token));
         }
-        return Some((found, token));
     }
     return None;
+}
+
+pub fn get_n_tokens(s : &mut String, n : u32, advance : bool) -> Option<(String, Vec<Token>)>
+{
+    if n == 0 {
+        return None;
+    }
+    let mut appended_tokens = String::new();
+    let mut s_cpy = s.to_owned();
+    let mut tokens : Vec<Token> = Vec::new();
+    for _ in 0..n {
+        let token = get_next_token(&mut s_cpy, true);
+        if token.is_none() {
+            return None;
+        }
+
+        appended_tokens += &(String::from(" ") + &token.as_ref().unwrap().0);
+        tokens.push(token.as_ref().unwrap().1.to_owned());
+    }
+    if advance {
+        *s = s_cpy;
+    }
+    appended_tokens.remove(0); // Just a whitespace character so dont need to have it there
+    return Some((appended_tokens, tokens));
 }
