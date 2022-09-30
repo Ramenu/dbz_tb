@@ -1,5 +1,4 @@
-
-
+use wasm_bindgen::prelude::*;
 
 pub const MAX_SA_LEVEL : i32 = 25;
 
@@ -13,6 +12,26 @@ enum Modifier
     Immense,
     Colossal,
     MegaColossal
+}
+
+// Note that modifiers can be inferred if a '%' token is encountered, so take the appropriate action 
+// to add or multiply based off of that
+#[wasm_bindgen]
+pub struct SaInfo
+{
+    modifier_dmg : f32,
+    stun : bool,
+    turns_to_stun : u32,
+    seal : bool,
+    turns_to_seal : u32,
+    atk_buff : f32,
+    atk_buff_turn_count : u32,
+    def_buff : f32,
+    def_buff_turn_count : u32,
+    enemy_atk_reduction : f32,
+    enemy_atk_reduction_turn_count : u32,
+    enemy_def_reduction : f32,
+    enemy_def_reduction_turn_count : u32
 }
 
 /// Returns an optional tuple consisting of the SA modifier
