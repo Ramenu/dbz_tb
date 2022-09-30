@@ -6,7 +6,7 @@ use std::fmt;
 use std::collections::{hash_map, HashMap};
 use wasm_bindgen::prelude::*;
 
-#[derive(Clone)]
+#[derive(Copy, Clone)]
 pub enum Token 
 {
     Op,
@@ -182,13 +182,9 @@ pub fn get_n_tokens(s : &mut String, n : u32, advance : bool) -> Option<(String,
     let mut s_cpy = s.to_owned();
     let mut tokens : Vec<Token> = Vec::new();
     for _ in 0..n {
-        let token = get_next_token(&mut s_cpy, true);
-        if token.is_none() {
-            return None;
-        }
-
-        appended_tokens += &(String::from(" ") + &token.as_ref().unwrap().0);
-        tokens.push(token.as_ref().unwrap().1.to_owned());
+        let token = get_next_token(&mut s_cpy, true)?;
+        appended_tokens += &(String::from(" ") + &token.0);
+        tokens.push(token.1);
     }
     if advance {
         *s = s_cpy;
