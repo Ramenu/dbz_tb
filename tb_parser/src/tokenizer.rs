@@ -3,7 +3,6 @@
 use regex::Regex;
 use lazy_static::lazy_static;
 use std::fmt;
-use std::collections::{hash_map, HashMap};
 use wasm_bindgen::prelude::*;
 
 #[derive(Copy, Clone)]
@@ -16,14 +15,17 @@ pub enum Token
     Null
 }
 
+pub enum TokenKeywordType
+{
+    Stat,
+    Type,
+    Generic
+}
+
 lazy_static! {
     // Beware this regex is far from perfect at the moment
     static ref RE : Regex = Regex::new(r"([^\s\W]*[^\W][-']?\w*|[^\w\s])").expect("Failed to compile regex"); 
-    static ref SPACE_STR : String = String::from(" ");
 }
-
-pub const TYPE : u32 = 0x1;
-pub const STAT : u32 = 0x2;
 
 #[cfg(debug_assertions)]
 impl fmt::Display for Token 
@@ -40,62 +42,28 @@ impl fmt::Display for Token
     }
 }
 
+/// Returns true if 's' is a number.
+/// Note that this does not count decimal
+/// numbers.
 #[inline]
 pub fn is_number(s : &String) -> bool {
     return s.parse::<i32>().is_ok();
 }
 
-#[inline]
-pub fn s_is_binary_op(s : &str) -> bool 
+pub fn get_token_keyword_category(s : &str) -> TokenKeywordType
 {
-    return match s {
-        "+" | "-" | "*" | "/" | ";" | "&" => true,
-        _ => false
+    return match s 
+    {
+        "atk"|"def"|"hp" => TokenKeywordType::Stat,
+        "str"|"phy"|"int"|"teq"|"agl" => TokenKeywordType::Type,
+        _ => TokenKeywordType::Generic
     };
 }
 
-#[inline]
-pub fn c_is_binary_op(c : char) -> bool {
-    return match c 
-    {
-        '+' | '-' | '*' | '/' | ';' | '&' => true,
-        _ => false
-    };
-}
-
-pub fn get_binary_op(s : &str) -> Option<char> 
-{
-    for (_, c) in s.chars().enumerate() 
-    {
-        if c_is_binary_op(c) {
-            return Some(c);
-        }
-    }
-    return None;
-}
-
-pub fn is_conditional_token(s : &str) -> bool {
-    return true;
-}
-
-
+/// Returns the type of the token given a 
+/// string argument.
 pub fn get_token(s : &str) -> Token 
 {
-    lazy_static! 
-    {
-        static ref KEYWORD_TO_CATEGORIES : HashMap<&'static str, u32> = HashMap::from([
-            ("atk", STAT),
-            ("def", STAT),
-            ("hp", STAT),
-            ("ki", STAT),
-            ("str", TYPE),
-            ("phy", TYPE),
-            ("int", TYPE),
-            ("teq", TYPE),
-            ("agl", TYPE),
-        ]);
-
-    }
     let token: Token = match s.to_lowercase().as_str()
     {
         "raises" | "atk" | "def" | "hp" | "category" |
@@ -151,10 +119,16 @@ pub fn get_token(s : &str) -> Token
 }
 
 #[inline]
+/// Returns true if the string 's' contains any
+/// more tokens.
 pub fn has_more_tokens(s : &str) -> bool {
     return !s.trim().is_empty();
 }
 
+/// Returns an optional tuple consisting of a string and a token.
+/// 's' is only modified iff 'advance' holds true. That is, the token
+/// will be removed from the string. If a token cannot be found in a string
+/// then None will be returned.
 pub fn get_next_token(s : &mut String, advance : bool) -> Option<(String, Token)>
 {
     if has_more_tokens(&s)
@@ -173,6 +147,11 @@ pub fn get_next_token(s : &mut String, advance : bool) -> Option<(String, Token)
     return None;
 }
 
+/// Returns an optional tuple consisting of a string and a vector of tokens.
+/// Retrieves 'n' tokens from the string 's', and also advances the string 'n'
+/// times if the advance flag is set to true. If n == 0 or the string does not
+/// contain 'n' or more tokens, then None will be returned and 's' will not be 
+/// modified at all.
 pub fn get_n_tokens(s : &mut String, n : u32, advance : bool) -> Option<(String, Vec<Token>)>
 {
     if n == 0 {
@@ -183,7 +162,8 @@ pub fn get_n_tokens(s : &mut String, n : u32, advance : bool) -> Option<(String,
     let mut tokens : Vec<Token> = Vec::new();
     for _ in 0..n {
         let token = get_next_token(&mut s_cpy, true)?;
-        appended_tokens += &(String::from(" ") + &token.0);
+        appended_tokens.push_str(" ");
+        appended_tokens += &token.0;
         tokens.push(token.1);
     }
     if advance {
