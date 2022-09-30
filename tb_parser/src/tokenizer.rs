@@ -133,7 +133,6 @@ pub fn get_next_token(s : &mut String, advance : bool) -> Option<(String, Token)
 {
     if has_more_tokens(&s)
     {
-
         if RE.is_match(s) 
         {
             let found = RE.find(&s).expect("Unable to find match in string").as_str().to_string();
