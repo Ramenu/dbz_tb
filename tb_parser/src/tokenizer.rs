@@ -68,7 +68,7 @@ pub fn get_token_keyword_category(s : &str) -> TokenKeywordType
 /// string argument.
 pub fn get_token(s : &str) -> Token 
 {
-    let token: Token = match s.to_lowercase().as_str()
+    let token: Token = match s
     {
         "raises" | "atk" | "def" | "hp" | "category" |
         "type" | "and" | "or" | "str" | "agl" | "teq" |
@@ -112,7 +112,7 @@ pub fn get_token(s : &str) -> Token
         "etc" | "at" => return Token::Keyword,
 
         // Note '/' can be used for OR options like 'Enemies/Allies' ATK +10%' 
-        "+" | "-" | "*" | "/" | ";" | "&" | ">" | "=" | "<" | "\"" | "%" => return Token::Op,
+        "+" | "-" | "*" | "/" | ";" | "&" | ">" | "=" | "<" | "\"" | "%" | "," => return Token::Op,
         _ => Token::Identifier
     };
     if String::from(s).parse::<i32>().is_ok() {
