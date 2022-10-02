@@ -5,7 +5,7 @@ use lazy_static::lazy_static;
 use std::fmt;
 use wasm_bindgen::prelude::*;
 
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, PartialEq)]
 pub enum Token 
 {
     Op,
@@ -42,6 +42,19 @@ impl fmt::Display for Token
     }
 }
 
+/// Returns true if the token can be skipped (i.e., is of
+/// little importance to the semantics of the sentence).
+pub fn is_skippable_token(token : &(String, Token)) -> bool
+{
+    if token.1 != Token::Keyword || token.1 != Token::Op {
+        return false;
+    }
+    return match token.0.as_str() {
+        ";"|"and" => true,
+        _ => false
+    };
+}
+
 /// Returns true if 's' is a number.
 /// Note that this does not count decimal
 /// numbers.
@@ -62,13 +75,20 @@ pub fn get_token_keyword_category(s : &str) -> TokenKeywordType
     };
 }
 
+/// Simply advances 's' to get the next
+/// token.
+#[inline]
+pub fn skip_token(s : &mut String) {
+    get_next_token(s, true);
+}
+
 
 
 /// Returns the type of the token given a 
 /// string argument.
-pub fn get_token(s : &str) -> Token 
+pub fn get_token(s : &String) -> Token 
 {
-    let token: Token = match s
+    let token: Token = match s.as_str()
     {
         "raises" | "atk" | "def" | "hp" | "category" |
         "type" | "and" | "or" | "str" | "agl" | "teq" |
@@ -115,7 +135,7 @@ pub fn get_token(s : &str) -> Token
         "+" | "-" | "*" | "/" | ";" | "&" | ">" | "=" | "<" | "\"" | "%" | "," => return Token::Op,
         _ => Token::Identifier
     };
-    if String::from(s).parse::<i32>().is_ok() {
+    if s.parse::<i32>().is_ok() {
         return Token::Number;
     }
 
