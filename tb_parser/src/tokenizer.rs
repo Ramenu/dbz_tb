@@ -50,6 +50,8 @@ pub fn is_number(s : &String) -> bool {
     return s.parse::<i32>().is_ok();
 }
 
+/// Returns the category of the token. Requires that
+/// 's' is a keyword token.
 pub fn get_token_keyword_category(s : &str) -> TokenKeywordType
 {
     return match s 
@@ -59,6 +61,8 @@ pub fn get_token_keyword_category(s : &str) -> TokenKeywordType
         _ => TokenKeywordType::Generic
     };
 }
+
+
 
 /// Returns the type of the token given a 
 /// string argument.
@@ -123,6 +127,20 @@ pub fn get_token(s : &str) -> Token
 /// more tokens.
 pub fn has_more_tokens(s : &str) -> bool {
     return !s.trim().is_empty();
+}
+
+/// Returns the number of tokens contained in
+/// the string 's'.
+pub fn get_number_of_tokens(s : &str) -> usize
+{
+    let mut n : usize = 0;
+    let mut s_cpy = String::from(s);
+
+    while has_more_tokens(&s_cpy) {
+        n += 1;
+        get_next_token(&mut s_cpy, true);
+    }
+    return n;
 }
 
 /// Returns an optional tuple consisting of a string and a token.

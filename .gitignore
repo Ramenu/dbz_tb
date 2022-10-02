@@ -15,7 +15,6 @@
 /coverage
 /tb_scraper/tb_scraper
 /tb_scraper/*.txt
-/tb_scraper/*.json
 /tb_parser/target
 
 # production

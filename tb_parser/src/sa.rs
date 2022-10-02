@@ -31,7 +31,8 @@ pub struct SaInfo
     enemy_atk_reduction : f32,
     enemy_atk_reduction_turn_count : u32,
     enemy_def_reduction : f32,
-    enemy_def_reduction_turn_count : u32
+    enemy_def_reduction_turn_count : u32,
+    atk_all_enemies : bool
 }
 
 /// Returns an optional tuple consisting of the SA modifier
