@@ -1,11 +1,12 @@
 use wasm_bindgen::prelude::*;
 use regex::Regex;
 use lazy_static::lazy_static;
+use crate::tokenizer;
 
 pub const MAX_SA_LEVEL : i32 = 25;
 
 lazy_static! {
-    pub static ref SA_RE : Regex = Regex::new(r"causes (low|damage|huge|extreme|mass|supreme|immense|colossal|mega-colossal) damage to a?l?l? ?(enemy|enemies)").expect("Failed to compile regex");
+    static ref SA_RE : Regex = Regex::new(r"causes (low|damage|huge|extreme|mass|supreme|immense|colossal|mega-colossal) d?a?m?a?g?e? ?to a?l?l? ?(enemy|enemies)").expect("Failed to compile regex");
 }
 
 // Note that modifiers can be inferred if a '%' token is encountered, so take the appropriate action 
@@ -55,7 +56,6 @@ pub fn get_sa_match(s : &str) -> Option<regex::Match> {
 }
 
 
-
 /// Returns a modifier wrapped in Option. If a
 /// valid super attack sentence structure cannot be 
 /// found then the program will most likely panic.
@@ -80,6 +80,7 @@ pub fn get_sa_modifier(s : &str) -> Option<Modifier>
     };
 }
 
+/// Returns the modifier percent boost.
 pub fn get_sa_modifier_atk(modifier : Modifier) -> f32
 {
     const SA_MODIFIER_LOW : f32 = 1.3;
@@ -115,7 +116,7 @@ pub fn get_sa_atk_stat(atk : f32, modifier_dmg : f32, sa_level : i32) -> f32
 
 #[wasm_bindgen]
 /// Call this function with the super attack lowercased!
-pub fn parse_super_attack(sa_eff : &str) -> Option<SaInfo>
+pub fn parse_super_attack(sa_eff : &str) -> SaInfo
 {
     let mut sa = SaInfo::default();
     let mut i : usize = 0;
@@ -123,5 +124,20 @@ pub fn parse_super_attack(sa_eff : &str) -> Option<SaInfo>
     let sa_match = get_sa_match(sa_eff).expect("Failed to find match in super attack").as_str();
     sa.modifier = get_sa_modifier(sa_match).expect("Failed to retrieve super attack modifier");
 
-    return None;
+    // Remove the sa modifier
+    let mut s = SA_RE.replace(sa_eff, "").to_string();
+    let no_of_tokens = tokenizer::get_number_of_tokens(&s);
+
+    for _ in 0..no_of_tokens
+    {
+        let token = tokenizer::get_next_token(&mut s, false).expect("Could not retrieve next token");
+        if tokenizer::is_skippable_token(&token) {
+            tokenizer::skip_token(&mut s);
+            continue;
+        }
+        if token.1 == tokenizer::Token::Keyword {
+
+        }
+    }
+    return sa;
 }
