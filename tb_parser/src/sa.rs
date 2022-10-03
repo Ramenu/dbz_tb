@@ -147,9 +147,8 @@ pub fn parse_super_attack(sa_eff : &str) -> SaInfo
 
     // Remove the sa modifier
     let mut s = SA_RE.replace(sa_eff, "").to_string();
-    let no_of_tokens = tokenizer::get_number_of_tokens(&s);
 
-    for _ in 0..no_of_tokens
+    while tokenizer::has_more_tokens(&s)
     {
         let token = tokenizer::get_next_token(&mut s, false).expect("Could not retrieve next token");
         if tokenizer::is_skippable_token(&token) {
