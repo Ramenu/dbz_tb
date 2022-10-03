@@ -4,6 +4,5 @@ mod tester;
 mod effectparser;
 fn main() 
 {
-    let s = "and causes immense damage to enemy".to_string();
-    tester::test_sa_retrieval();
+    tester::test_raises_or_lowers_stat();
 }

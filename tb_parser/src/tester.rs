@@ -74,3 +74,32 @@ pub fn test_sa_retrieval()
     }
 
 }
+
+
+#[cfg(debug_assertions)]
+pub fn test_raises_or_lowers_stat()
+{
+    use crate::effectparser::{raises_or_lowers_stat, stat_effect_flag_meaning};
+ 
+    let status_effects : [&str; 10] = [
+        "raises atk",
+        "raises def",
+        "lowers atk",
+        "lowers def",
+        "greatly raises atk",
+        "greatly raises def",
+        "greatly lowers atk",
+        "greatly lowers def",
+        "raises atk for 5 turns",
+        "raises atk for 1 turn"
+    ];
+
+    for s in status_effects
+    {
+        let mut tmp = s.to_string();
+        let stat = raises_or_lowers_stat(&mut tmp, false).expect("Test failed. L");
+
+        stat_effect_flag_meaning(stat.get_stat_effect());
+        println!("Duration: {}", stat.get_stat_effect_turn_count());
+    }
+}
