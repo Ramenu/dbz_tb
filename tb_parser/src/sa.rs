@@ -1,12 +1,14 @@
 use wasm_bindgen::prelude::*;
 use regex::Regex;
 use lazy_static::lazy_static;
+use  std::fmt;
 use crate::tokenizer;
 
 pub const MAX_SA_LEVEL : i32 = 25;
 
 lazy_static! {
-    static ref SA_RE : Regex = Regex::new(r"causes (low|damage|huge|extreme|mass|supreme|immense|colossal|mega-colossal) d?a?m?a?g?e? ?to a?l?l? ?(enemy|enemies)").expect("Failed to compile regex");
+    static ref SA_RE : Regex = Regex::new(r"^causes (low damage|damage|huge damage|extreme damage|mass damage|supreme damage|immense damage|colossal damage|mega-colossal)(?: to (?:all)? ?(?:enemy|enemies))?")
+                                      .expect("Failed to compile regex");
 }
 
 // Note that modifiers can be inferred if a '%' token is encountered, so take the appropriate action 
@@ -41,6 +43,25 @@ pub enum Modifier
     MegaColossal
 }
 
+#[cfg(debug_assertions)]
+impl fmt::Display for Modifier
+{
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        let s = match self 
+        {
+            Modifier::Low => "low",
+            Modifier::Damage => "damage",
+            Modifier::HugeDestructive => "huge/destructive",
+            Modifier::ExtremeMass => "extreme/mass",
+            Modifier::Supreme => "supreme",
+            Modifier::Immense => "immense",
+            Modifier::Colossal => "colossal",
+            Modifier::MegaColossal => "mega-colossal"
+        };
+        write!(f, "{}", s)
+    }
+}
+
 #[derive(Clone, Copy, Default)]
 pub enum SaEffect
 {
@@ -68,14 +89,14 @@ pub fn get_sa_modifier(s : &str) -> Option<Modifier>
                                .as_str();
     return match modifier
     {
-        "low" => Some(Modifier::Low),
+        "low damage" => Some(Modifier::Low),
         "damage" => Some(Modifier::Damage),
-        "huge" => Some(Modifier::HugeDestructive),
-        "extreme"|"mass" => Some(Modifier::ExtremeMass),
-        "supreme" => Some(Modifier::Supreme),
-        "immense" => Some(Modifier::Immense),
-        "colossal" => Some(Modifier::Colossal),
-        "mega-colossal" => Some(Modifier::MegaColossal),
+        "huge damage" => Some(Modifier::HugeDestructive), // destructive damage isnt found in any of the units
+        "mass damage"|"extreme damage" => Some(Modifier::ExtremeMass), 
+        "supreme damage" => Some(Modifier::Supreme),
+        "immense damage" => Some(Modifier::Immense),
+        "colossal damage" => Some(Modifier::Colossal),
+        "mega-colossal damage" => Some(Modifier::MegaColossal),
         _ => None
     };
 }
@@ -110,7 +131,7 @@ pub fn get_sa_modifier_atk(modifier : Modifier) -> f32
 /// performing a super attack. 
 pub fn get_sa_atk_stat(atk : f32, modifier_dmg : f32, sa_level : i32) -> f32
 {
-    debug_assert!(sa_level <= MAX_SA_LEVEL);
+    assert!(sa_level <= MAX_SA_LEVEL);
     return atk * modifier_dmg * sa_level as f32;
 }
 
