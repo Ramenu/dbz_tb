@@ -114,8 +114,8 @@ pub fn get_sa_atk_stat(atk : f32, modifier_dmg : f32, sa_level : i32) -> f32
     return atk * modifier_dmg * sa_level as f32;
 }
 
-#[wasm_bindgen]
 /// Call this function with the super attack lowercased!
+#[wasm_bindgen]
 pub fn parse_super_attack(sa_eff : &str) -> SaInfo
 {
     let mut sa = SaInfo::default();

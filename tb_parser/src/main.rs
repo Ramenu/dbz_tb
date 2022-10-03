@@ -1,6 +1,6 @@
 mod tokenizer;
 mod sa;
-mod effectparser;
+//mod effectparser;
 fn main() 
 {
     let mut s = String::from("ATK and DEF +120% at start of turn; Ki +2 in addition per  Ki Sphere obtained; perform Potara fusion when conditions are met");

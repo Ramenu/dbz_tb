@@ -1,5 +1,6 @@
 mod utils;
 mod tokenizer;
+mod sa;
 
 use wasm_bindgen::prelude::*;
 
@@ -12,6 +13,11 @@ static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
 #[wasm_bindgen]
 extern {
     fn alert(s: &str);
+}
+
+#[wasm_bindgen]
+pub fn add(n1 : i32, n2 : i32) -> i32 {
+    return n1 + n2;
 }
 
 

@@ -1,9 +1,9 @@
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
 # dependencies
-/www/node_modules
-/www/.pnp
-/www/.pnp.js
+/tb_web/node_modules
+/tb_web/.pnp
+/tb_web/.pnp.js
 **/*.rs.bk
 /tb_parser/Cargo.lock
 /tb_parser/bin/
@@ -23,17 +23,22 @@
 /tb_parser/target
 
 # misc
-/www/.DS_Store
-/www/.env.local
-/www/.env.development.local
-/www/.env.test.local
-/www/.env.production.local
+/tb_web/.DS_Store
+/tb_web/.env.local
+/tb_web/.env.development.local
+/tb_web/.env.test.local
+/tb_web/.env.production.local
 
-/www/npm-debug.log*
-/www/yarn-debug.log*
-/www/yarn-error.log*
+/tb_web/npm-debug.log*
+/tb_web/yarn-debug.log*
+/tb_web/yarn-error.log*
 
 
 # Added by cargo
 
-/target
+/tb_parser/target
+/tb_parser/**/*.rs.bk
+/tb_parser/Cargo.lock
+/tb_parser/bin/
+/tb_parser/pkg/
+/tb_parser/wasm-pack.log
