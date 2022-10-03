@@ -1,4 +1,5 @@
 use crate::{tokenizer, sa};
+use std::arch::asm;
 
 /// Prints the token type for 's'.
 #[cfg(debug_assertions)]
@@ -32,25 +33,44 @@ pub fn test_token_retrieval(s : &String)
     assert!(token_count == i);
 }
 
+/// Prints super attack and modifier matches. You can check
+/// if anything is suspicious by checking the print logs. If something
+/// is suspicious, go fix it.
 #[cfg(debug_assertions)]
 pub fn test_sa_retrieval()
 {
-    let super_atks : [&str; 8] = [
-        "causes low damage to enemy",
-        "causes damage to enemy",
-        "causes huge damage to enemy",
-        "causes mass damage to all enemies",
+    let super_atks : [&str; 9] = [
+        "causes low damage",
+        "causes damage",
+        "causes huge damage",
+        "causes mass damage",
         "causes extreme damage",
-        "causes extreme damage to enemy",
         "causes supreme damage",
-        "causes supreme damage to enemy"
+        "causes immense damage",
+        "causes colossal damage",
+        "causes mega-colossal damage"
     ];
 
+    // Round 1
     for s in super_atks 
     {
-        let sa_match = sa::get_sa_match(&s).expect("Failed to find match in super attack").as_str();
+        let sa_match = sa::get_sa_match(s).expect("Failed to find match in super attack").as_str();
         let modifier = sa::get_sa_modifier(sa_match).expect("Failed to retrieve super attack modifier");
-        println!("Super attack is: {}\nModifier is: {}", sa_match, modifier);
+        println!("\nTest string is: {}\n-----------\nSuper attack is: {}\nModifier is: {}", s, sa_match, modifier);
+    }
+
+    let mut t = String::from(" to enemy");
+    // Round 2
+    for _ in 0..2 
+    {
+        for s in super_atks 
+        {
+            let s = String::from(s) + &t;
+            let sa_match = sa::get_sa_match(&s).expect("Failed to find match in super attack").as_str();
+            let modifier = sa::get_sa_modifier(sa_match).expect("Failed to retrieve super attack modifier");
+            println!("\nTest string is: {}\n-----------\nSuper attack is: {}\nModifier is: {}", s, sa_match, modifier);
+        }
+        t = " to all enemies".to_string();
     }
 
 }
