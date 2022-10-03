@@ -7,7 +7,7 @@ use crate::tokenizer;
 pub const MAX_SA_LEVEL : i32 = 25;
 
 lazy_static! {
-    static ref SA_RE : Regex = Regex::new(r"^causes (low damage|damage|huge damage|extreme damage|mass damage|supreme damage|immense damage|colossal damage|mega-colossal damage)(?: to (?:all)? ?(?:enemy|enemies))?")
+    static ref SA_RE : Regex = Regex::new(r"^causes (low damage|damage|huge damage|extreme damage|mass damage|supreme damage|immense damage|colossal damage|mega-colossal damage)(?: to (?:the|all)? ?(?:enemy|enemies))?")
                                       .expect("Failed to compile regex");
 }
 
