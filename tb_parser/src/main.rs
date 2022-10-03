@@ -1,7 +1,7 @@
 mod tokenizer;
 mod sa;
 mod tester;
-//mod effectparser;
+mod effectparser;
 fn main() 
 {
     let s = "and causes immense damage to enemy".to_string();
