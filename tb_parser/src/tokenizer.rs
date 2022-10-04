@@ -46,7 +46,7 @@ impl fmt::Display for Token
 /// little importance to the semantics of the sentence).
 pub fn is_skippable_token(token : &(String, Token)) -> bool
 {
-    if token.1 != Token::Keyword || token.1 != Token::Op {
+    if token.1 != Token::Keyword && token.1 != Token::Op {
         return false;
     }
     return match token.0.as_str() {
@@ -163,6 +163,15 @@ pub fn get_number_of_tokens(s : &str) -> usize
     return n;
 }
 
+/// Truncates the whitespace at the start of
+/// the string.
+fn trim_leading_whitespce(s : &mut String)
+{
+    while s.starts_with(' ') {
+        s.remove(0);
+    }
+}
+
 /// Returns an optional tuple consisting of a string and a token.
 /// 's' is only modified iff 'advance' holds true. That is, the token
 /// will be removed from the string. If a token cannot be found in a string
@@ -177,6 +186,7 @@ pub fn get_next_token(s : &mut String, advance : bool) -> Option<(String, Token)
             let token = get_token(&found);
             if advance {
                 *s = RE.replace(s, "").to_string();
+                trim_leading_whitespce(s);
             }
             return Some((found, token));
         }
