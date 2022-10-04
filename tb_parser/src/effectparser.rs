@@ -13,13 +13,16 @@ pub const EFF_GREATLY : u32 = 0x10;
 pub const EFF_ENEMY : u32 = 0x20;
 pub const EFF_ALL : u32 = 0x40;
 
-pub struct Effect
+
+pub struct StatEffect
 {
     stat_eff : u32,
     stat_eff_turn_count : u32
 }
 
-impl Effect
+
+
+impl StatEffect
 {
     pub fn get_stat_effect(&self) -> u32 {
         return self.stat_eff;
@@ -67,6 +70,7 @@ pub fn stat_effect_flag_meaning(stat_eff : u32)
     println!("Status effect: {}", s);
 }
 
+
 /// Returns the stat effect as a flag.
 fn get_stat_effect(s : &str) -> Option<u32>
 {
@@ -75,7 +79,7 @@ fn get_stat_effect(s : &str) -> Option<u32>
     if s.contains("raises") || s.contains("increases") {
         eff |= EFF_RAISES;
     } else if s.contains("lowers") || s.contains("decreases") {
-        eff |= EFF_LOWERS;
+        eff |= EFF_LOWERS|EFF_ENEMY;
     } 
 
     if s.contains("greatly") {
@@ -112,7 +116,7 @@ fn get_stat_effect(s : &str) -> Option<u32>
 pub fn get_eff_turn_count(s : &mut String, advance : bool) -> u32
 {
     lazy_static! {
-        static ref TURN_COUNT_RE : Regex = Regex::new(r"^ ?for (\d*) turns?").expect("Failed to compile regex");
+        static ref TURN_COUNT_RE : Regex = Regex::new(r"^for (\d*) turns?").expect("Failed to compile regex");
     }
 
     let mut turn_count : u32 = 0;
@@ -139,11 +143,11 @@ pub fn get_eff_turn_count(s : &mut String, advance : bool) -> u32
 /// Returns an optional effect. If no stat-changing effect is found in the
 /// string 's' then None will be returned. It can also advance the string
 /// up until the end of the stat-changing effect if the 'advance' flag is
-/// set to true.
-pub fn raises_or_lowers_stat(s : &mut String, advance : bool) -> Option<Effect>
+/// set to true. Note that it won't advance if there is no stat-changing effect.
+pub fn raises_or_lowers_stat(s : &mut String, advance : bool) -> Option<StatEffect>
 {
     lazy_static! {
-        static ref RE : Regex = Regex::new(r"^((?:greatly )?(?:lowers|raises|increases|decreases) (?:all )?(?:(?:enemy|enemies) )?(?:atk|def))")
+        static ref RE : Regex = Regex::new(r"^((?:greatly )?(?:lowers|raises|increases|decreases) (?:all )?(?:(?:enemy|enemies|enemy's) )?(?:atk|def))")
                                 .expect("Failed to compile regex");
     }
 
@@ -153,9 +157,9 @@ pub fn raises_or_lowers_stat(s : &mut String, advance : bool) -> Option<Effect>
     if advance 
     {
         *s = RE.replace(s, "").to_string();
-        return Some(Effect{stat_eff: stat_eff, stat_eff_turn_count: get_eff_turn_count(s, true)});
+        return Some(StatEffect{stat_eff: stat_eff, stat_eff_turn_count: get_eff_turn_count(s, true)});
     }
 
     let mut tmp = RE.replace(s, "").to_string();
-    return Some(Effect{stat_eff: stat_eff, stat_eff_turn_count: get_eff_turn_count(&mut tmp, false)});
+    return Some(StatEffect{stat_eff: stat_eff, stat_eff_turn_count: get_eff_turn_count(&mut tmp, false)});
 }
