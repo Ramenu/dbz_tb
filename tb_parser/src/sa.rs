@@ -8,14 +8,13 @@ use crate::{tokenizer, effectparser::{self, EFF_RAISES, EFF_GREATLY, EFF_LOWERS,
 pub const MAX_SA_LEVEL : i32 = 25;
 
 pub const SAEFFECT_NULL : u32 = 0x0;
-pub const SAEFFECT_STUN : u32 = 0x1;
-pub const SAEFFECT_SEAL : u32 = 0x2;
-pub const SAEFFECT_ATK_ALL_ENEMIES : u32 = 0x4;
-pub const SAEFFECT_STATCHANGE_ON_ENEMY : u32 = 0x8;
-pub const SAEFFECT_STATCHANGE_ON_ALL_ENEMIES : u32 = 0x10;
+pub const SAEFFECT_EFFECT_ON_ALL_ENEMIES : u32 = 0x1;
+pub const SAEFFECT_STUN : u32 = 0x2;
+pub const SAEFFECT_SEAL : u32 = 0x4;
+pub const SAEFFECT_ATK_ALL_ENEMIES : u32 = 0x8;
 
 lazy_static! {
-    static ref SA_RE : Regex = Regex::new(r"^causes (low damage|damage|huge damage|extreme damage|mass damage|supreme damage|immense damage|colossal damage|mega-colossal damage)(?: to (?:the|all)? ?(?:enemy|enemies))?")
+    static ref SA_RE : Regex = Regex::new(r"^(?:causes )?(low damage|damage|huge damage|extreme damage|mass damage|supreme damage|immense damage|colossal damage|mega-colossal damage)(?: to (?:the|all)? ?(?:enemy|enemies))?")
                                       .expect("Failed to compile regex");
 }
 
@@ -29,8 +28,10 @@ pub struct SaInfo
     effect : u32,
     atk_buff : f32,
     def_buff : f32,
-    atkdef_buff_turn_count : u16, // Includes attack/def buff count in same variable
-    turns_to_stunseal : u16,
+    atkdef_buff_turn_count : u32, // Includes attack/def buff count in same variable
+    stun_chance : u32,
+    seal_chance : u32,
+    turns_to_stunseal : u32,
     enemy_atk_reduction : f32,
     enemy_def_reduction : f32,
     enemy_atk_reduction_turn_count : u32,
@@ -47,6 +48,8 @@ impl SaInfo
                         atk_buff: 0.0, def_buff: 0.0, 
                         atkdef_buff_turn_count: 0, 
                         turns_to_stunseal: 0, 
+                        stun_chance: 0,
+                        seal_chance: 0,
                         enemy_atk_reduction: 0.0, 
                         enemy_def_reduction: 0.0, 
                         enemy_atk_reduction_turn_count: 0, 
@@ -68,6 +71,19 @@ impl SaInfo
     pub fn get_def_buff(&self) -> f32 {
         return self.def_buff;
     }
+    #[wasm_bindgen(getter = stun_chance)]
+    pub fn get_stun_chance(&self) -> u32 {
+        return self.stun_chance;
+    }
+    #[wasm_bindgen(getter = turns_to_stunseal)]
+    pub fn get_turns_to_stunseal(&self) -> u32 {
+        return self.turns_to_stunseal;
+    }
+    #[wasm_bindgen(getter = seal_chance)]
+    pub fn get_seal_chance(&self) -> u32 {
+        return self.seal_chance;
+    }
+
 }
 
 #[wasm_bindgen]
@@ -104,7 +120,8 @@ impl fmt::Display for Modifier
 }
 
 
-
+/// Returns an optional regex match. If no match
+/// is found then None will be returned.
 #[inline]
 pub fn get_sa_match(s : &str) -> Option<regex::Match> {
     return SA_RE.find(&s);
@@ -186,15 +203,14 @@ fn get_sa_stat_change_eff(eff : effectparser::StatEffect, sa : &mut SaInfo)
     if eff.get_stat_effect()&EFF_ALL != NULL {
         sa.effect |= SAEFFECT_ATK_ALL_ENEMIES;
     }
-    if eff.get_stat_effect()&EFF_ENEMY != NULL {
-        sa.effect |= SAEFFECT_STATCHANGE_ON_ENEMY;
-    }
+
     if eff.get_stat_effect()&EFF_ATK != NULL {
         sa.atk_buff += boost;
     }
     if eff.get_stat_effect()&EFF_DEF != NULL {
         sa.def_buff += boost;
     }
+
 }
 
 /// Call this function with the super attack lowercased!
@@ -226,6 +242,11 @@ pub fn parse_super_attack(sa_eff : &str) -> SaInfo
                 let eff = eff_opt.expect("Failed to retrieve stat effect");
                 get_sa_stat_change_eff(eff, &mut sa);
             }
+
+            let stun_eff = effectparser::get_stun_effect(&mut s, true);
+            sa.stun_chance = stun_eff.get_eff_chance();
+            sa.turns_to_stunseal = stun_eff.get_eff_turn_count();
+            sa.effect |= stun_eff.get_on_all_enemies();
         }
     }
     return sa;
