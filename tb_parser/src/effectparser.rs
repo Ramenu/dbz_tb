@@ -17,10 +17,29 @@ pub const EFF_ALL : u32 = 0x40;
 pub struct StatEffect
 {
     stat_eff : u32,
-    stat_eff_turn_count : u32
+    stat_eff_turn_count : u32,
 }
 
 
+pub struct EffectChance
+{
+    eff_chance : u32,
+    eff_turn_count : u32,
+    on_all_enemies : u32
+}
+
+impl EffectChance
+{
+    pub fn get_eff_chance(&self) -> u32 {
+        return self.eff_chance;
+    }
+    pub fn get_eff_turn_count(&self) -> u32 {
+        return self.eff_turn_count;
+    }
+    pub fn get_on_all_enemies(&self) -> u32 {
+        return self.on_all_enemies;
+    }
+}
 
 impl StatEffect
 {
@@ -121,18 +140,21 @@ pub fn get_eff_turn_count(s : &mut String, advance : bool) -> u32
 
     let mut turn_count : u32 = 0;
 
-    let capture = TURN_COUNT_RE.captures(s);
-    if capture.is_some() 
+    if tokenizer::has_more_tokens(s)
     {
-        turn_count = capture.expect("Failed to find match")
-                            .get(1)
-                            .expect("Failed to retrieve first capture group")
-                            .as_str()
-                            .parse::<u32>()
-                            .expect("Failed to convert string to u32");
-        
-        if advance {
-            *s = TURN_COUNT_RE.replace(&s, "").to_string();
+        let capture = TURN_COUNT_RE.captures(s);
+        if capture.is_some() 
+        {
+            turn_count = capture.expect("Failed to find match")
+                                .get(1)
+                                .expect("Failed to retrieve first capture group")
+                                .as_str()
+                                .parse::<u32>()
+                                .expect("Failed to convert string to u32");
+            
+            if advance {
+                *s = TURN_COUNT_RE.replace(&s, "").to_string();
+            }
         }
     }
 
@@ -162,4 +184,87 @@ pub fn raises_or_lowers_stat(s : &mut String, advance : bool) -> Option<StatEffe
 
     let mut tmp = RE.replace(s, "").to_string();
     return Some(StatEffect{stat_eff: stat_eff, stat_eff_turn_count: get_eff_turn_count(&mut tmp, false)});
+}
+
+/// Returns the percentage chance. Note that
+/// this is not completely identical to Dokkan's
+/// chance system (it's way too mixed up).
+pub fn get_chance_percentage(s : &str) -> u32
+{
+    const ULTRA_RARE_CHANCE_PERCENTAGE : u32 = 1;
+    const RARE_CHANCE_PERCENTAGE : u32 = 15;
+    const MAY_CHANCE_PERCENTAGE : u32 = 20;
+    const CHANCE_PERCENTAGE : u32 = 25;
+    const MEDIUM_CHANCE_PERCENTAGE : u32 = 30;
+    const HIGH_CHANCE_PERCENTAGE : u32 = 50;
+    const GREAT_CHANCE_PERCENTAGE : u32 = 70;
+    return match s
+    {
+        "ultra-rare chance" => ULTRA_RARE_CHANCE_PERCENTAGE, // devilman sa
+        "rare chance" => RARE_CHANCE_PERCENTAGE,
+        "may" => MAY_CHANCE_PERCENTAGE,
+        "chance"|"with a chance" => CHANCE_PERCENTAGE,
+        "medium chance" => MEDIUM_CHANCE_PERCENTAGE,
+        "high chance" => HIGH_CHANCE_PERCENTAGE,
+        "great chance" => GREAT_CHANCE_PERCENTAGE,
+        _ => 0
+    };
+}
+
+/// Returns 1 if the string matches
+/// 'all enemies' literally. This is not
+/// returned as a boolean because the return
+/// value is meant to be used as a flag.
+#[inline]
+pub fn targets_all_enemies(s : &str) -> u32
+{
+    if s == "all enemies" {
+        return 1;
+    }
+    return 0;
+}
+
+/// Returns effectchance, will just be all 0's if
+/// there is no stun chance. 
+pub fn get_stun_effect(s : &mut String, advance : bool) -> EffectChance
+{
+    lazy_static! {
+        static ref RE : Regex = Regex::new(r"^((?:ultra-rare|rare|great|medium|high|with a)? ?chance|may) (?:to|of)? ?(?:stunning|stun) (the (?:attacked)? ?enemy|all enemies)(?: within the same turn)?")
+                                .expect("Failed to compile regex");
+    }
+
+
+    let capture = RE.captures(s);
+
+    if capture.is_some()
+    {
+        let mut num_turns;
+        let capture_match = capture.expect("Failed to find match");
+        let chance = capture_match.get(1).expect("Failed to retrieve first capture group").as_str();
+        let target = capture_match.get(2).expect("Failed to retrieve second capture group").as_str();
+
+        let stun_chance = get_chance_percentage(chance);
+        let targets_all_enemies = targets_all_enemies(target);
+
+        if advance {
+            *s = tokenizer::advance_until(s, &RE);
+            num_turns = get_eff_turn_count(s, true);
+        } else {
+            let mut tmp = tokenizer::advance_until(s, &RE);
+            num_turns = get_eff_turn_count(&mut tmp, false);
+        }
+
+        /* num_turns would be 0 if a turn count is not specified. So adding by one is necessary if the
+           stun chance is more than 0%. */
+        if num_turns == 0 && stun_chance > 0 {
+            num_turns += 1;
+        }
+
+        return EffectChance { eff_chance: stun_chance, 
+                              eff_turn_count: num_turns, 
+                              on_all_enemies: targets_all_enemies };
+
+    }
+
+    return EffectChance { eff_chance: 0, eff_turn_count: 0, on_all_enemies: 0 };
 }
