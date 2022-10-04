@@ -55,6 +55,15 @@ pub fn is_skippable_token(token : &(String, Token)) -> bool
     };
 }
 
+/// Uses the regex 'r' to replace the match with
+/// empty text. It also trims the leading whitespace.
+pub fn advance_until(s : &String, r : &Regex) -> String
+{
+    let mut n = r.replace(s, "").to_string();
+    trim_leading_whitespace(&mut n);
+    return n;
+}
+
 /// Returns true if 's' is a number.
 /// Note that this does not count decimal
 /// numbers.
@@ -129,7 +138,7 @@ pub fn get_token(s : &String) -> Token
         "other" | "than" | "excluded" | "included" | "certain" | "entrance" |
         "animation" | "guards" | "critical" | "not" | "single" | "targeted" |
         "their" | "every" | "perform" | "rest" | "it" | "ultra" | "belong" |
-        "etc" | "at" => return Token::Keyword,
+        "etc" | "at" | "ultra-rare" | "deadly" => return Token::Keyword,
 
         // Note '/' can be used for OR options like 'Enemies/Allies' ATK +10%' 
         "+" | "-" | "*" | "/" | ";" | "&" | ">" | "=" | "<" | "\"" | "%" | "," => return Token::Op,
@@ -165,7 +174,7 @@ pub fn get_number_of_tokens(s : &str) -> usize
 
 /// Truncates the whitespace at the start of
 /// the string.
-fn trim_leading_whitespce(s : &mut String)
+fn trim_leading_whitespace(s : &mut String)
 {
     while s.starts_with(' ') {
         s.remove(0);
@@ -186,7 +195,7 @@ pub fn get_next_token(s : &mut String, advance : bool) -> Option<(String, Token)
             let token = get_token(&found);
             if advance {
                 *s = RE.replace(s, "").to_string();
-                trim_leading_whitespce(s);
+                trim_leading_whitespace(s);
             }
             return Some((found, token));
         }
