@@ -39,7 +39,7 @@ pub fn test_token_retrieval(s : &String)
 #[cfg(debug_assertions)]
 pub fn test_sa_retrieval()
 {
-    let super_atks : [&str; 9] = [
+    let super_atks : [&str; 10] = [
         "causes low damage",
         "causes damage",
         "causes huge damage",
@@ -48,7 +48,8 @@ pub fn test_sa_retrieval()
         "causes supreme damage",
         "causes immense damage",
         "causes colossal damage",
-        "causes mega-colossal damage"
+        "causes mega-colossal damage",
+        "low damage"
     ];
 
     // Round 1
@@ -75,7 +76,8 @@ pub fn test_sa_retrieval()
 
 }
 
-
+/// Tests if the stat raising and lowering is working as it
+/// should.
 #[cfg(debug_assertions)]
 pub fn test_raises_or_lowers_stat()
 {
@@ -116,10 +118,18 @@ pub fn test_super_attack_parsing(extensive_test : bool)
     {
         test_sa_retrieval();
         test_raises_or_lowers_stat();
+        test_get_stun_effect();
     }
-    let super_atks : [&str; 2] = [
+    let super_atks : [&str; 9] = [
         "causes huge damage to enemy and lowers atk",
         "causes huge damage to enemy and lowers def",
+        "huge damage and rare chance to stun the enemy",
+        "causes huge damage and may stun the enemy",
+        "extreme damage and rare chance to stun the enemy",
+        "huge damage and high chance to stun the enemy for 1 turn",
+        "extreme damage and may stun the enemy for 2 turns",
+        "low damage and great chance to stun the enemy for 3 turns",
+        "causes extreme damage; may stun the attacked enemy within the same turn"
     ];
 
     for s in super_atks
@@ -128,6 +138,47 @@ pub fn test_super_attack_parsing(extensive_test : bool)
         println!("Super attack modifier: {}
 Super attack effect: {}
 ATK Buff: {}
-DEF Buff: {}", sa.get_modifier(), sa.get_effect(), sa.get_atk_buff(), sa.get_def_buff());
+DEF Buff: {}
+Stun chance: {}
+Stun lasts for: {} turns
+-------------------", sa.get_modifier(), sa.get_effect(), sa.get_atk_buff(), sa.get_def_buff(), sa.get_stun_chance(), sa.get_turns_to_stunseal());
     }
+}
+
+#[cfg(debug_assertions)]
+pub fn test_get_stun_effect()
+{
+    use crate::effectparser;
+
+    let effects : [&str; 19] = [
+        "rare chance to stun the enemy",
+        "medium chance to stun the enemy",
+        "great chance to stun the enemy",
+        "chance to stun the enemy",
+        "high chance to stun all enemies",
+        "may stun the enemy",
+        "may stun all enemies",
+        "rare chance to stun all enemies",
+        "great chance to stun all enemies",
+        "medium chance to stun all enemies",
+        "high chance to stun all enemies",
+        "rare chance of stunning the attacked enemy",
+        "chance of stunning the enemy",
+        "may stun the attacked enemy",
+        "with a chance to stun the enemy",
+        "rare chance to stun the enemy for 3 turns",
+        "high chance to stun all enemies for 5 turns",
+        "chance to stun the attacked enemy for 4 turns",
+        "medium chance to stun the enemy for 1 turn"
+    ];
+
+    for s in effects
+    {
+        let mut s = s.to_string();
+        let stun_eff = effectparser::get_stun_effect(&mut s, false);
+        println!("Effect: {}\nStun chance: {}%\nStun all enemies: {}\nNumber of turns: {}\n--------", 
+                 s, stun_eff.get_eff_chance(), stun_eff.get_on_all_enemies(), stun_eff.get_eff_turn_count());
+    }
+
+
 }
