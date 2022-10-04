@@ -1,8 +1,10 @@
 mod tokenizer;
+mod effectparser;
 mod sa;
 mod tester;
-mod effectparser;
+mod modifier;
+
 fn main() 
 {
-    tester::test_raises_or_lowers_stat();
+    tester::test_super_attack_parsing(false);
 }
