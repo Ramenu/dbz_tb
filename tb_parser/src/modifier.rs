@@ -1,0 +1,3 @@
+
+pub const EFF_INC_OR_DEC_MODIFIER : f32 = 1.3;
+pub const EFF_GREATLY_INC_OR_DEC_MODIFIER : f32 = 1.5;
