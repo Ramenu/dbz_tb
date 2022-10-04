@@ -1,18 +1,17 @@
 import logo from './logo.svg';
 import './App.css';
 import React, {useState, useEffect} from 'react';
-import init, {add, parse_super_attack } from './pkg/tb_parser';
+import { parse_super_attack } from './pkg/tb_parser';
 
 function App() {
-  const [sa, setSa] = useState(0);
-  init().then(() => setSa(add(788, 2)));
+  let a = parse_super_attack("causes huge damage to enemy");
+  console.log(a.modifier);
   return (
     <div className="App">
       <header className="App-header">
         <img src={logo} className="App-logo" alt="logo" />
         <p>
           Edit <code>src/App.js</code> and save to reload.<br/>
-          Number is: {sa}
         </p>
         <a
           className="App-link"
