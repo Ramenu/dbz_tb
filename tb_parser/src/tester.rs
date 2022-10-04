@@ -103,3 +103,31 @@ pub fn test_raises_or_lowers_stat()
         println!("Duration: {}", stat.get_stat_effect_turn_count());
     }
 }
+
+/// Should be called only when:
+/// test_sa_retrieval() PASSED
+/// test_raises_or_lowers_stat() PASSED
+/// if this works, then the other two probably
+/// work as well.
+#[cfg(debug_assertions)]
+pub fn test_super_attack_parsing(extensive_test : bool)
+{
+    if extensive_test
+    {
+        test_sa_retrieval();
+        test_raises_or_lowers_stat();
+    }
+    let super_atks : [&str; 2] = [
+        "causes huge damage to enemy and lowers atk",
+        "causes huge damage to enemy and lowers def",
+    ];
+
+    for s in super_atks
+    {
+        let sa = sa::parse_super_attack(s);
+        println!("Super attack modifier: {}
+Super attack effect: {}
+ATK Buff: {}
+DEF Buff: {}", sa.get_modifier(), sa.get_effect(), sa.get_atk_buff(), sa.get_def_buff());
+    }
+}
