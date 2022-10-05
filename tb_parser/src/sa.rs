@@ -1,17 +1,12 @@
 use wasm_bindgen::prelude::*;
 use regex::Regex;
 use lazy_static::lazy_static;
-use  std::fmt;
+use std::fmt;
 
-use crate::{tokenizer, effectparser::{self, EFF_RAISES, EFF_GREATLY, EFF_LOWERS, EFF_ALL, EFF_ENEMY, EFF_ATK, EFF_DEF, NULL}, modifier};
+use crate::{tokenizer, effectparser::{self, EFF_RAISES, EFF_GREATLY, EFF_LOWERS, EFF_ALL, EFF_ENEMY, EFF_ATK, EFF_DEF, NULL}, effect};
 
 pub const MAX_SA_LEVEL : i32 = 25;
 
-pub const SAEFFECT_NULL : u32 = 0x0;
-pub const SAEFFECT_EFFECT_ON_ALL_ENEMIES : u32 = 0x1;
-pub const SAEFFECT_STUN : u32 = 0x2;
-pub const SAEFFECT_SEAL : u32 = 0x4;
-pub const SAEFFECT_ATK_ALL_ENEMIES : u32 = 0x8;
 
 lazy_static! {
     static ref SA_RE : Regex = Regex::new(r"^(?:causes )?(low damage|damage|huge damage|extreme damage|mass damage|supreme damage|immense damage|colossal damage|mega-colossal damage)(?: to (?:the|all)? ?(?:enemy|enemies))?")
@@ -31,7 +26,8 @@ pub struct SaInfo
     atkdef_buff_turn_count : u32, // Includes attack/def buff count in same variable
     stun_chance : u32,
     seal_chance : u32,
-    turns_to_stunseal : u32,
+    turns_to_stun : u32,
+    turns_to_seal : u32,
     enemy_atk_reduction : f32,
     enemy_def_reduction : f32,
     enemy_atk_reduction_turn_count : u32,
@@ -44,10 +40,11 @@ impl SaInfo
     #[wasm_bindgen(constructor)]
     pub fn new() -> SaInfo {
         return SaInfo { modifier: Modifier::Low, 
-                        effect: SAEFFECT_NULL, 
+                        effect: effect::EFFECT_NULL, 
                         atk_buff: 0.0, def_buff: 0.0, 
                         atkdef_buff_turn_count: 0, 
-                        turns_to_stunseal: 0, 
+                        turns_to_stun: 0, 
+                        turns_to_seal: 0,
                         stun_chance: 0,
                         seal_chance: 0,
                         enemy_atk_reduction: 0.0, 
@@ -75,9 +72,13 @@ impl SaInfo
     pub fn get_stun_chance(&self) -> u32 {
         return self.stun_chance;
     }
-    #[wasm_bindgen(getter = turns_to_stunseal)]
-    pub fn get_turns_to_stunseal(&self) -> u32 {
-        return self.turns_to_stunseal;
+    #[wasm_bindgen(getter = turns_to_stun)]
+    pub fn get_turns_to_stun(&self) -> u32 {
+        return self.turns_to_stun;
+    }
+    #[wasm_bindgen(getter = turns_to_seal)]
+    pub fn get_turns_to_seal(&self) -> u32 {
+        return self.turns_to_seal;
     }
     #[wasm_bindgen(getter = seal_chance)]
     pub fn get_seal_chance(&self) -> u32 {
@@ -192,16 +193,16 @@ fn get_sa_stat_change_eff(eff : effectparser::StatEffect, sa : &mut SaInfo)
 {
     let mut boost = 0.0f32;
     if eff.get_stat_effect()&EFF_GREATLY != NULL {
-        boost += modifier::EFF_GREATLY_INC_OR_DEC_MODIFIER;
+        boost += effect::EFF_GREATLY_INC_OR_DEC_MODIFIER;
     }
     if eff.get_stat_effect()&EFF_RAISES != NULL {
-        boost += modifier::EFF_INC_OR_DEC_MODIFIER;
+        boost += effect::EFF_INC_OR_DEC_MODIFIER;
     }
     if eff.get_stat_effect()&EFF_LOWERS != NULL {
-        boost -= modifier::EFF_INC_OR_DEC_MODIFIER;
+        boost -= effect::EFF_INC_OR_DEC_MODIFIER;
     }
     if eff.get_stat_effect()&EFF_ALL != NULL {
-        sa.effect |= SAEFFECT_ATK_ALL_ENEMIES;
+        sa.effect |= effect::EFFECT_ATK_ALL_ENEMIES;
     }
 
     if eff.get_stat_effect()&EFF_ATK != NULL {
@@ -218,7 +219,6 @@ fn get_sa_stat_change_eff(eff : effectparser::StatEffect, sa : &mut SaInfo)
 pub fn parse_super_attack(sa_eff : &str) -> SaInfo
 {
     let mut sa = SaInfo::default();
-    let mut i : usize = 0;
 
     let sa_match = get_sa_match(sa_eff).expect("Failed to find match in super attack").as_str();
     sa.modifier = get_sa_modifier(sa_match).expect("Failed to retrieve super attack modifier");
@@ -245,8 +245,13 @@ pub fn parse_super_attack(sa_eff : &str) -> SaInfo
 
             let stun_eff = effectparser::get_stun_effect(&mut s, true);
             sa.stun_chance = stun_eff.get_eff_chance();
-            sa.turns_to_stunseal = stun_eff.get_eff_turn_count();
+            sa.turns_to_stun = stun_eff.get_eff_turn_count();
             sa.effect |= stun_eff.get_on_all_enemies();
+
+            let seal_eff = effectparser::get_seal_effect(&mut s, true);
+            sa.seal_chance = seal_eff.get_eff_chance();
+            sa.turns_to_seal = seal_eff.get_eff_turn_count();
+            sa.effect |= seal_eff.get_on_all_enemies();
         }
     }
     return sa;

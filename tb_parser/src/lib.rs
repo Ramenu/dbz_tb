@@ -2,7 +2,7 @@ mod utils;
 mod tokenizer;
 mod effectparser;
 mod sa;
-mod modifier;
+mod effect;
 
 use wasm_bindgen::prelude::*;
 

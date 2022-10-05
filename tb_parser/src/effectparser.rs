@@ -1,8 +1,9 @@
 use std::default::Default;
 
-use crate::{tokenizer, sa::{self, SaInfo}};
+use crate::{tokenizer, sa::{self, SaInfo}, effect};
 use lazy_static::lazy_static;
 use regex::Regex;
+
 
 pub const NULL : u32 = 0x0;
 pub const EFF_ATK : u32 = 0x1;
@@ -14,6 +15,14 @@ pub const EFF_ENEMY : u32 = 0x20;
 pub const EFF_ALL : u32 = 0x40;
 
 
+pub const ULTRA_RARE_CHANCE_PERCENTAGE : u32 = 1;
+pub const RARE_CHANCE_PERCENTAGE : u32 = 15;
+pub const MAY_CHANCE_PERCENTAGE : u32 = 20;
+pub const CHANCE_PERCENTAGE : u32 = 25;
+pub const MEDIUM_CHANCE_PERCENTAGE : u32 = 30;
+pub const HIGH_CHANCE_PERCENTAGE : u32 = 50;
+pub const GREAT_CHANCE_PERCENTAGE : u32 = 70;
+
 pub struct StatEffect
 {
     stat_eff : u32,
@@ -23,9 +32,9 @@ pub struct StatEffect
 
 pub struct EffectChance
 {
-    eff_chance : u32,
-    eff_turn_count : u32,
-    on_all_enemies : u32
+    pub eff_chance : u32,
+    pub eff_turn_count : u32,
+    pub on_all_enemies : u32
 }
 
 impl EffectChance
@@ -191,13 +200,6 @@ pub fn raises_or_lowers_stat(s : &mut String, advance : bool) -> Option<StatEffe
 /// chance system (it's way too mixed up).
 pub fn get_chance_percentage(s : &str) -> u32
 {
-    const ULTRA_RARE_CHANCE_PERCENTAGE : u32 = 1;
-    const RARE_CHANCE_PERCENTAGE : u32 = 15;
-    const MAY_CHANCE_PERCENTAGE : u32 = 20;
-    const CHANCE_PERCENTAGE : u32 = 25;
-    const MEDIUM_CHANCE_PERCENTAGE : u32 = 30;
-    const HIGH_CHANCE_PERCENTAGE : u32 = 50;
-    const GREAT_CHANCE_PERCENTAGE : u32 = 70;
     return match s
     {
         "ultra-rare chance" => ULTRA_RARE_CHANCE_PERCENTAGE, // devilman sa
@@ -216,12 +218,8 @@ pub fn get_chance_percentage(s : &str) -> u32
 /// returned as a boolean because the return
 /// value is meant to be used as a flag.
 #[inline]
-pub fn targets_all_enemies(s : &str) -> u32
-{
-    if s == "all enemies" {
-        return 1;
-    }
-    return 0;
+pub fn targets_all_enemies(s : &str) -> bool {
+    return s == "all enemies" || s == "all enemies'";
 }
 
 /// Returns effectchance, will just be all 0's if
@@ -233,7 +231,6 @@ pub fn get_stun_effect(s : &mut String, advance : bool) -> EffectChance
                                 .expect("Failed to compile regex");
     }
 
-
     let capture = RE.captures(s);
 
     if capture.is_some()
@@ -244,7 +241,10 @@ pub fn get_stun_effect(s : &mut String, advance : bool) -> EffectChance
         let target = capture_match.get(2).expect("Failed to retrieve second capture group").as_str();
 
         let stun_chance = get_chance_percentage(chance);
-        let targets_all_enemies = targets_all_enemies(target);
+        let targets_all = match targets_all_enemies(target) {
+            true => effect::EFFECT_STUN_ON_ALL_ENEMIES,
+            false => effect::EFFECT_NULL
+        };
 
         if advance {
             *s = tokenizer::advance_until(s, &RE);
@@ -262,7 +262,61 @@ pub fn get_stun_effect(s : &mut String, advance : bool) -> EffectChance
 
         return EffectChance { eff_chance: stun_chance, 
                               eff_turn_count: num_turns, 
-                              on_all_enemies: targets_all_enemies };
+                              on_all_enemies: targets_all };
+
+    }
+
+    return EffectChance { eff_chance: 0, eff_turn_count: 0, on_all_enemies: 0 };
+}
+
+
+/// Returns effectchance, will just be all 0's if
+/// there is no eeal chance. 
+pub fn get_seal_effect(s : &mut String, advance : bool) -> EffectChance
+{
+    lazy_static! {
+        static ref RE : Regex = Regex::new(r"^((?:ultra-rare|rare|great|medium|high|with a)? ?chance|may)? ?(?:to|of)? ?(?:seal|seals|sealing) (?:that)? ?(the attacked enemy's|all enemies'|enemy's)? ?super attacks?")
+                                .expect("Failed to compile regex");
+    }
+
+    let capture = RE.captures(s);
+
+    if capture.is_some()
+    {
+        let mut num_turns;
+        let mut seal_chance : u32 = 100; // Seal chance is guaranteed to be 100% if no match is found
+        let mut targets_all : u32 = effect::EFFECT_NULL; // Guaranteed to hit one enemy only if no match is found
+        let capture_match = capture.expect("Failed to find match");
+        let chance = capture_match.get(1);
+        let target = capture_match.get(2);
+
+        if chance.is_some() {
+            seal_chance = get_chance_percentage(chance.expect("Failed to get first capture").as_str());
+        }
+        if target.is_some() {
+            targets_all = match targets_all_enemies(target.expect("Failed to get second capture").as_str()) {
+                true => effect::EFFECT_SEAL_ON_ALL_ENEMIES,
+                false => effect::EFFECT_NULL
+            };
+        }
+
+        if advance {
+            *s = tokenizer::advance_until(s, &RE);
+            num_turns = get_eff_turn_count(s, true);
+        } else {
+            let mut tmp = tokenizer::advance_until(s, &RE);
+            num_turns = get_eff_turn_count(&mut tmp, false);
+        }
+
+        /* num_turns would be 0 if a turn count is not specified. So adding by one is necessary if the
+           stun chance is more than 0%. */
+        if num_turns == 0 && seal_chance > 0 {
+            num_turns += 1;
+        }
+
+        return EffectChance { eff_chance: seal_chance, 
+                              eff_turn_count: num_turns, 
+                              on_all_enemies: targets_all };
 
     }
 
