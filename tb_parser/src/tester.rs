@@ -159,29 +159,50 @@ pub fn test_super_attack_parsing(extensive_test : bool)
         ("colossal damage", sa::Modifier::Colossal),
         ("mega-colossal damage", sa::Modifier::MegaColossal)
     ];
-    let super_atks : [&str; 9] = [
-        "causes huge damage to enemy and lowers atk",
-        "causes huge damage to enemy and lowers def",
-        "huge damage and rare chance to stun the enemy",
-        "causes huge damage and may stun the enemy",
-        "extreme damage and rare chance to stun the enemy",
-        "huge damage and high chance to stun the enemy for 1 turn",
-        "extreme damage and may stun the enemy for 2 turns",
-        "low damage and great chance to stun the enemy for 3 turns",
-        "causes extreme damage; may stun the attacked enemy within the same turn"
+
+    const START_WORDS : [&str; 2] = [
+        "",
+        "causes "
     ];
 
-    for s in super_atks
+    struct StatChange
     {
-        let sa = sa::parse_super_attack(s);
-        println!("Super attack modifier: {}
-Super attack effect: {}
-ATK Buff: {}
-DEF Buff: {}
-Stun chance: {}
-Stun lasts for: {} turns
--------------------", sa.get_modifier(), sa.get_effect(), sa.get_atk_buff(), sa.get_def_buff(), sa.get_stun_chance(), sa.get_turns_to_stun());
+        pub atk_buff : f32,
+        pub def_buff : f32
     }
+
+    use crate::effect::{EFF_INC_OR_DEC_MODIFIER, EFF_GREATLY_INC_OR_DEC_MODIFIER};
+
+    const END_WORDS : [(&str, StatChange); 9] = [
+        ("", StatChange{atk_buff: 0.0, def_buff: 0.0}),
+        (" and lowers atk", StatChange{atk_buff: -EFF_INC_OR_DEC_MODIFIER, def_buff: 0.0}),
+        (" and lowers def", StatChange{atk_buff: 0.0, def_buff: -EFF_INC_OR_DEC_MODIFIER}),
+        (" and greatly lowers atk", StatChange{atk_buff: -EFF_GREATLY_INC_OR_DEC_MODIFIER, def_buff: 0.0}),
+        (" and greatly lowers def", StatChange{atk_buff: 0.0, def_buff: -EFF_GREATLY_INC_OR_DEC_MODIFIER}),
+
+        (" and raises atk", StatChange{atk_buff: EFF_INC_OR_DEC_MODIFIER, def_buff: 0.0}),
+        (" and raises def", StatChange{atk_buff: 0.0, def_buff: EFF_INC_OR_DEC_MODIFIER}),
+        (" and greatly raises atk", StatChange{atk_buff: EFF_GREATLY_INC_OR_DEC_MODIFIER, def_buff: 0.0}),
+        (" and greatly raises def", StatChange{atk_buff: 0.0, def_buff: EFF_GREATLY_INC_OR_DEC_MODIFIER})
+    ];
+
+    for start in START_WORDS 
+    {
+        for modifier in SA_MODIFIERS
+        {
+            for end in END_WORDS
+            {
+                let s = start.to_string() + modifier.0 + end.0;
+                let sa = sa::parse_super_attack(&s);
+
+                assert_eq!(sa.get_modifier(), modifier.1);
+                assert_eq!(sa.get_atk_buff(), end.1.atk_buff);
+                assert_eq!(sa.get_def_buff(), end.1.def_buff);
+            }
+        }
+    }
+
+    pass("test_super_attack_parsing()");
 }
 
 #[cfg(debug_assertions)]
@@ -221,8 +242,9 @@ pub fn test_get_stun_effect()
 #[cfg(debug_assertions)]
 pub fn test_get_seal_effect()
 {
+    use crate::effect::EFFECT_SEAL_ON_ALL_ENEMIES;
     let effects : [(&str, EffectChance); 10] = [
-        ("rare chance to seal all enemies' super attack", EffectChance{eff_chance: RARE_CHANCE_PERCENTAGE, eff_turn_count: 1, on_all_enemies: 1}),
+        ("rare chance to seal all enemies' super attack", EffectChance{eff_chance: RARE_CHANCE_PERCENTAGE, eff_turn_count: 1, on_all_enemies: EFFECT_SEAL_ON_ALL_ENEMIES}),
         ("may seal enemy's super attack", EffectChance{eff_chance: MAY_CHANCE_PERCENTAGE, eff_turn_count: 1, on_all_enemies: 0}),
         ("seals super attack", EffectChance{eff_chance: 100, eff_turn_count: 1, on_all_enemies: 0}),
         ("medium chance to seal super attack", EffectChance{eff_chance: MEDIUM_CHANCE_PERCENTAGE, eff_turn_count: 1, on_all_enemies: 0}),
