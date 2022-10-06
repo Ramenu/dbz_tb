@@ -88,7 +88,7 @@ impl SaInfo
 }
 
 #[wasm_bindgen]
-#[derive(Clone, Copy, Default)]
+#[derive(Clone, Copy, Default, Debug, PartialEq)]
 pub enum Modifier 
 {
     #[default] Low,
@@ -191,15 +191,16 @@ pub fn get_sa_atk_stat(atk : f32, modifier_dmg : f32, sa_level : i32) -> f32
 /// on the stat effect.
 fn get_sa_stat_change_eff(eff : effectparser::StatEffect, sa : &mut SaInfo)
 {
+    let mut additional_boost = 0.0;
     let mut boost = 0.0f32;
     if eff.get_stat_effect()&EFF_GREATLY != NULL {
-        boost += effect::EFF_GREATLY_INC_OR_DEC_MODIFIER;
+        additional_boost = effect::EFF_GREATLY_INC_OR_DEC_MODIFIER - effect::EFF_INC_OR_DEC_MODIFIER;
     }
     if eff.get_stat_effect()&EFF_RAISES != NULL {
-        boost += effect::EFF_INC_OR_DEC_MODIFIER;
+        boost += effect::EFF_INC_OR_DEC_MODIFIER + additional_boost;
     }
     if eff.get_stat_effect()&EFF_LOWERS != NULL {
-        boost -= effect::EFF_INC_OR_DEC_MODIFIER;
+        boost -= effect::EFF_INC_OR_DEC_MODIFIER + additional_boost;
     }
     if eff.get_stat_effect()&EFF_ALL != NULL {
         sa.effect |= effect::EFFECT_ATK_ALL_ENEMIES;
