@@ -10,6 +10,7 @@ import (
 type Unit struct {
 	Url string `json:"URL,omitempty"`
 	Icon string `json:"Icon,omitempty"`
+	Art string `json:"Art,omitempty"`
 	Name string `json:"Name,omitempty"`
 	Rarity string `json:"Rarity,omitempty"`
 	Typ string `json:"Type,omitempty"`
@@ -25,6 +26,14 @@ type Unit struct {
 	Atk uint `json:"ATK,omitempty"`
 	Def uint `json:"DEF,omitempty"`
 	Hp uint `json:"HP,omitempty"`
+}
+
+func isAprilFoolsYamchaCard(name string) bool {
+	return name == "Flash of Glory Yamcha" ||
+	       name == "Absolute Loss Yamcha" ||
+		   name == "Gallant Fighter Yamcha" ||
+		   name == "Fierce Declaration of War Yamcha" ||
+		   name == "Go-Ahead Home Run Yamcha"
 }
 
 // Returns an array of all the units found on the
@@ -45,7 +54,7 @@ func GetAllInfoOnUnits(page *page) []Unit {
 				infoResponseBody := getPageTemplate(&infoResponse.Body)
 				if isValidResponse(infoResponseBody) {
 
-					var unitCategories, unitType, unitUltraSa, unitUnitSA, unitUnitSAActivation, unitActiveSkill, unitTransCondition, unitIcon string
+					var unitCategories, unitType, unitUltraSa, unitUnitSA, unitUnitSAActivation, unitActiveSkill, unitTransCondition, unitIcon, unitFullImg string
 					unitName := removeHTMLTags(GetNameReg().FindStringSubmatch(infoResponseBody)[1])
 					unitRarity := removeHTMLTags(GetRarityReg().FindStringSubmatch(infoResponseBody)[2])
 					unitLeaderSkill := removeHTMLTags(replaceHTMLTypeIcons(GetLeaderSkillReg().FindStringSubmatch(infoResponseBody)[1]))
@@ -65,6 +74,13 @@ func GetAllInfoOnUnits(page *page) []Unit {
 						unitUltraSa = removeHTMLTags(GetUltraSuperAtkReg().FindStringSubmatch(infoResponseBody)[1])
 						unitIcon = removeHTMLTags(GetUnitIconReg().FindStringSubmatch(infoResponseBody)[2])
 					} else {
+						// The 'joke' yamcha cards have a animated image different from non-LR cards, so they have to be extracted
+						// differently.
+						if !isAprilFoolsYamchaCard(unitName) {
+							unitFullImg = removeHTMLTags(GetUnitFullImgReg().FindStringSubmatch(infoResponseBody)[1])
+						} else {
+							unitFullImg = removeHTMLTags(GetUnitFullImgReg().FindStringSubmatch(infoResponseBody)[2])
+						}
 						unitIcon = removeHTMLTags(GetUnitIconReg().FindStringSubmatch(infoResponseBody)[1])
 					}
 
@@ -93,6 +109,7 @@ func GetAllInfoOnUnits(page *page) []Unit {
 
 					units = append(units, Unit{
 								   Url: fullUnitURL,
+								   Art: unitFullImg,
 								   Icon: unitIcon,
 								   Name: unitName,
 								   Rarity: unitRarity,
