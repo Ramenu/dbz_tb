@@ -39,7 +39,7 @@ const defRegPattern = "(?s)Def\\.png.*?" + statRegPattern
 const transformationConditionRegPattern = "(?s)Transformation_Condition\\.png.*?<tr><td colspan=\"2\"><center>(.*?)</center>"
 
 const unitIconRegPattern = "(?s)(?:<td style=\"width: 100px;\" rowspan=\"3\"><a href=\"(.*?)\" class=\"image\">|<td style=\"width: 100px;\" rowspan=\"3\"><div class=\"apng size120px\"><img src=\"(.*?)\")"
-//const unitIconRegPattern = "(?s)<td style=\"width: 100px;\" rowspan=\"3\"><div class=\"apng size120px\"><img src=\"(.*?)\""
+const unitFullImgRegPattern = "(?s)(?:<tbody><tr><td><center><span class=\"advanced-tooltip\"><a href=\"(.*?)\" class=\"image\">|<div class=\"ts-slide\"><a href=\"(.*?)\" class=\"image\">)"
 
 
 var urlReg = regexp.MustCompile(urlRegPattern)
@@ -62,6 +62,7 @@ var atkReg = regexp.MustCompile(atkRegPattern)
 var defReg = regexp.MustCompile(defRegPattern)
 var transformationConditionReg = regexp.MustCompile(transformationConditionRegPattern)
 var unitIconReg = regexp.MustCompile(unitIconRegPattern)
+var unitFullImgReg = regexp.MustCompile(unitFullImgRegPattern)
 
 func GetURLReg() *regexp.Regexp {
 	return urlReg
@@ -141,6 +142,10 @@ func GetTransformationConditionReg() *regexp.Regexp {
 
 func GetUnitIconReg() *regexp.Regexp {
 	return unitIconReg
+}
+
+func GetUnitFullImgReg() *regexp.Regexp {
+	return unitFullImgReg
 }
 
 // Replaces the HTML type icons with the just the
