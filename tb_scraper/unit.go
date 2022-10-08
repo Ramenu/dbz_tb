@@ -71,8 +71,10 @@ func GetAllInfoOnUnits(page *page) []Unit {
 					}
 
 					if unitRarity == "LR" {
+						fmt.Println(infoResponseBody)
 						unitUltraSa = removeHTMLTags(GetUltraSuperAtkReg().FindStringSubmatch(infoResponseBody)[1])
 						unitIcon = removeHTMLTags(GetUnitIconReg().FindStringSubmatch(infoResponseBody)[2])
+						unitFullImg = removeHTMLTags(GetUnitFullImgReg().FindStringSubmatch(infoResponseBody)[3])
 					} else {
 						// The 'joke' yamcha cards have a animated image different from non-LR cards, so they have to be extracted
 						// differently.

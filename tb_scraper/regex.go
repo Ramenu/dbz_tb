@@ -39,7 +39,7 @@ const defRegPattern = "(?s)Def\\.png.*?" + statRegPattern
 const transformationConditionRegPattern = "(?s)Transformation_Condition\\.png.*?<tr><td colspan=\"2\"><center>(.*?)</center>"
 
 const unitIconRegPattern = "(?s)(?:<td style=\"width: 100px;\" rowspan=\"3\"><a href=\"(.*?)\" class=\"image\">|<td style=\"width: 100px;\" rowspan=\"3\"><div class=\"apng size120px\"><img src=\"(.*?)\")"
-const unitFullImgRegPattern = "(?s)(?:<tbody><tr><td><center><span class=\"advanced-tooltip\"><a href=\"(.*?)\" class=\"image\">|<div class=\"ts-slide\"><a href=\"(.*?)\" class=\"image\">)"
+const unitFullImgRegPattern = "(?s)(?:<tbody><tr><td><center><span class=\"advanced-tooltip\"><a href=\"(.*?)\" class=\"image\">|<div class=\"ts-slide\"><a href=\"(.*?)\" class=\"image\">|<div class=\"apng size250px\"><img src=\"(.*?)\")"
 
 
 var urlReg = regexp.MustCompile(urlRegPattern)
