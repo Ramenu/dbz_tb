@@ -9,6 +9,7 @@ import (
 
 type Unit struct {
 	Url string `json:"URL,omitempty"`
+	Icon string `json:"Icon,omitempty"`
 	Name string `json:"Name,omitempty"`
 	Rarity string `json:"Rarity,omitempty"`
 	Typ string `json:"Type,omitempty"`
@@ -44,7 +45,7 @@ func GetAllInfoOnUnits(page *page) []Unit {
 				infoResponseBody := getPageTemplate(&infoResponse.Body)
 				if isValidResponse(infoResponseBody) {
 
-					var unitCategories, unitType, unitUltraSa, unitUnitSA, unitUnitSAActivation, unitActiveSkill, unitTransCondition string
+					var unitCategories, unitType, unitUltraSa, unitUnitSA, unitUnitSAActivation, unitActiveSkill, unitTransCondition, unitIcon string
 					unitName := removeHTMLTags(GetNameReg().FindStringSubmatch(infoResponseBody)[1])
 					unitRarity := removeHTMLTags(GetRarityReg().FindStringSubmatch(infoResponseBody)[2])
 					unitLeaderSkill := removeHTMLTags(replaceHTMLTypeIcons(GetLeaderSkillReg().FindStringSubmatch(infoResponseBody)[1]))
@@ -62,6 +63,9 @@ func GetAllInfoOnUnits(page *page) []Unit {
 
 					if unitRarity == "LR" {
 						unitUltraSa = removeHTMLTags(GetUltraSuperAtkReg().FindStringSubmatch(infoResponseBody)[1])
+						unitIcon = removeHTMLTags(GetUnitIconReg().FindStringSubmatch(infoResponseBody)[2])
+					} else {
+						unitIcon = removeHTMLTags(GetUnitIconReg().FindStringSubmatch(infoResponseBody)[1])
 					}
 
 					if strings.Contains(infoResponseBody, "Unit_SA") {
@@ -73,7 +77,7 @@ func GetAllInfoOnUnits(page *page) []Unit {
 						unitActiveSkill = removeHTMLTags(GetActiveSkillReg().FindStringSubmatch(infoResponseBody)[1])
 					}
 
-					if /*strings.Contains(infoResponseBody, "Transformation_Condition.png")*/ GetTransformationConditionReg().MatchString(infoResponseBody) {
+					if GetTransformationConditionReg().MatchString(infoResponseBody) {
 						unitTransCondition = removeHTMLTags(GetTransformationConditionReg().FindStringSubmatch(infoResponseBody)[1])
 					}
 
@@ -85,10 +89,11 @@ func GetAllInfoOnUnits(page *page) []Unit {
 							unitActiveSkill += "; " + unitActiveCondition
 						}
 					}
-
+					
 
 					units = append(units, Unit{
 								   Url: fullUnitURL,
+								   Icon: unitIcon,
 								   Name: unitName,
 								   Rarity: unitRarity,
 								   Typ: unitType,
