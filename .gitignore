@@ -16,6 +16,7 @@
 /tb_scraper/tb_scraper
 /tb_scraper/*.txt
 /tb_parser/target
+/python/*.txt
 
 # production
 /build
