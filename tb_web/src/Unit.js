@@ -1,5 +1,5 @@
 import { isValidRarity, isValidType, isValidURL } from "./Checker";
-import { invalidURLMessage } from "./Error";
+import { invalidRarityMessage, invalidTypeMessage, invalidURLMessage } from "./Error";
 
 
 export class Unit
@@ -33,9 +33,16 @@ export class Unit
         if (!isValidURL(art))
             throw invalidURLMessage(art);
         if (!isValidRarity(rarity))
-            throw `Invalid rarity: ${rarity}`;
+            throw invalidRarityMessage(rarity);
         if (!isValidType(type))
-            throw `Invalid type: ${type}`;
+            throw invalidTypeMessage(type);
+        if (!Number.isInteger(atk))
+            throw `Invalid ATK stat: ${atk}`;
+        if (!Number.isInteger(def))
+            throw `Invalid DEF stat: ${def}`;
+        if (!Number.isInteger(hp))
+            throw `Invalid HP stat: ${hp}`;
+            
 
         this.url = url;
         this.icon = icon;
