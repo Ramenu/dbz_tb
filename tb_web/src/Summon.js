@@ -1,34 +1,24 @@
 
 import { Banner, BANNER_TYPE } from "./Banner";
+import { filterUnitsByRarity } from "./Filter";
 
-
-export const bannerSummon = (banner) =>
-{
-    switch (banner.type)
-    {
-        default: return performRareSummon();
-        case BANNER_TYPE.FriendSummon: return performFriendSummon();
-        case BANNER_TYPE.Dokkanfest: return performDokkanFestSummon();
-    }
+const gotSSR = (roll) => {
+    return roll >= 91 && roll <= 101;
 }
 
-const getFeaturedSSRUnits = (featuredUnits) =>
-{
-    
+const gotSR = (roll) => {
+    return roll >= 30 && roll <= 90;
 }
+
+const gotR = (roll) => {
+    return roll >= 0 && roll <= 29;
+}
+
 
 const performRareSummon = (banner) =>
 {
+    const ssrUnits = filterUnitsByRarity("SSR");
 
-}
-
-const performFriendSummon = (banner) =>
-{
-    
-}
-
-const performDokkanFestSummon = (banner) =>
-{
-
+    const roll = randint(0, 102);
 }
 

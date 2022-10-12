@@ -1,7 +1,7 @@
 
 /**
  * @param {String} url The HTTP/HTTPS URL you want to check is valid or not
- * @returns {Boolean} 
+ * @returns Boolean
  */
 export const isValidURL = (url) =>
 {
@@ -17,7 +17,7 @@ export const isValidURL = (url) =>
 /**
  * 
  * @param {String} type 
- * @returns {Boolean}
+ * @returns Boolean
  */
 export const isValidType = (type) =>
 {
@@ -31,7 +31,7 @@ export const isValidType = (type) =>
 /**
  * 
  * @param {String} rarity 
- * @returns {Boolean}
+ * @returns Boolean
  */
 export const isValidRarity = (rarity) =>
 {
