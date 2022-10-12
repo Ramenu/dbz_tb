@@ -7,6 +7,8 @@ import (
 	"fmt"
 )
 
+const dokkanWikiLink = "https://dbz-dokkanbattle.fandom.com"
+
 type Unit struct {
 	Url string `json:"URL,omitempty"`
 	Icon string `json:"Icon,omitempty"`
@@ -22,6 +24,7 @@ type Unit struct {
 	UnitSuperAtk string `json:"Unit Super Attack,omitempty"`
 	UnitSuperAtkCondition string `json:"Unit Super Attack Condition,omitempty"`
 	TransformationCondition string `json:"Transformation Condition,omitempty"`
+	AwakensInto string `json:"Awakens Into,omitempty"`
 	Categories []string `json:"Categories,omitempty"`
 	Atk uint `json:"ATK,omitempty"`
 	Def uint `json:"DEF,omitempty"`
@@ -47,14 +50,14 @@ func GetAllInfoOnUnits(page *page) []Unit {
 		if !strings.Contains(unit[1], "Category") && !strings.Contains(unit[1], "Wind-up Nutcracker") {
 
 			// Get info from the character's wiki link
-			fullUnitURL := "https://dbz-dokkanbattle.fandom.com" + unit[1]
+			fullUnitURL := dokkanWikiLink + unit[1]
 			infoResponse, infoErr := http.Get(fullUnitURL)
 
 			if infoErr == nil {
 				infoResponseBody := getPageTemplate(&infoResponse.Body)
 				if isValidResponse(infoResponseBody) {
 
-					var unitCategories, unitType, unitUltraSa, unitUnitSA, unitUnitSAActivation, unitActiveSkill, unitTransCondition, unitIcon, unitFullImg string
+					var unitCategories, unitType, unitUltraSa, unitUnitSA, unitUnitSAActivation, unitActiveSkill, unitTransCondition, unitIcon, unitFullImg, awakensInto string
 					unitName := removeHTMLTags(GetNameReg().FindStringSubmatch(infoResponseBody)[1])
 					unitRarity := removeHTMLTags(GetRarityReg().FindStringSubmatch(infoResponseBody)[2])
 					unitLeaderSkill := removeHTMLTags(replaceHTMLTypeIcons(GetLeaderSkillReg().FindStringSubmatch(infoResponseBody)[1]))
@@ -63,6 +66,10 @@ func GetAllInfoOnUnits(page *page) []Unit {
 					unitHP, _ := strconv.Atoi(removeHTMLTags(GetHPReg().FindStringSubmatch(infoResponseBody)[1]))
 					unitATK, _ := strconv.Atoi(removeHTMLTags(GetATKReg().FindStringSubmatch(infoResponseBody)[1]))
 					unitDEF, _ := strconv.Atoi(removeHTMLTags(GetDEFReg().FindStringSubmatch(infoResponseBody)[1]))
+					
+					if GetDokkanAwakenIntoReg().MatchString(infoResponseBody) {
+						awakensInto = dokkanWikiLink + removeHTMLTags(GetDokkanAwakenIntoReg().FindStringSubmatch(infoResponseBody)[1])
+					}
 
 					// Some pages may not have a category for a profile or a type
 					if GetCategoryReg().MatchString(infoResponseBody) && GetTypeIconNoOptReg().MatchString(infoResponseBody) {
@@ -71,7 +78,6 @@ func GetAllInfoOnUnits(page *page) []Unit {
 					}
 
 					if unitRarity == "LR" {
-						fmt.Println(infoResponseBody)
 						unitUltraSa = removeHTMLTags(GetUltraSuperAtkReg().FindStringSubmatch(infoResponseBody)[1])
 						unitIcon = removeHTMLTags(GetUnitIconReg().FindStringSubmatch(infoResponseBody)[2])
 						unitFullImg = removeHTMLTags(GetUnitFullImgReg().FindStringSubmatch(infoResponseBody)[3])
@@ -125,6 +131,7 @@ func GetAllInfoOnUnits(page *page) []Unit {
 								   UnitSuperAtkCondition: unitUnitSAActivation,
 								   TransformationCondition: unitTransCondition,
 								   Categories: strings.Split(unitCategories, " - "),
+								   AwakensInto: awakensInto,
 								   Atk: uint(unitATK),
 								   Def: uint(unitDEF),
 								   Hp: uint(unitHP)})
