@@ -50,12 +50,12 @@ def printUnits(arr):
             print(f"{NUM_SPACES}{arr[i]},")
 
 
-print("const N_UNITS = [")
+print("export const N_UNITS = [")
 printUnits(nUnits)
-print("];\n\nconst R_UNITS = [")
+print("];\n\nexport const R_UNITS = [")
 printUnits(rUnits)
-print("];\n\nconst SR_UNITS = [")
+print("];\n\nexport const SR_UNITS = [")
 printUnits(srUnits)
-print("];\n\nconst SSR_UNITS = [")
+print("];\n\nexport const SSR_UNITS = [")
 printUnits(ssrUnits)
 print("];")
