@@ -41,6 +41,8 @@ const transformationConditionRegPattern = "(?s)Transformation_Condition\\.png.*?
 const unitIconRegPattern = "(?s)(?:<td style=\"width: 100px;\" rowspan=\"3\"><a href=\"(.*?)\" class=\"image\">|<td style=\"width: 100px;\" rowspan=\"3\"><div class=\"apng size120px\"><img src=\"(.*?)\")"
 const unitFullImgRegPattern = "(?s)(?:<tbody><tr><td><center><span class=\"advanced-tooltip\"><a href=\"(.*?)\" class=\"image\">|<div class=\"ts-slide\"><a href=\"(.*?)\" class=\"image\">|<div class=\"apng size250px\"><img src=\"(.*?)\")"
 
+const dokkanAwakenRegPattern = "(?s)\"Arrow\\.png\".*?<a href=\"([\\w_/\\(\\)]*)\" title=\"(.*?)\".*?></a>(?:</span></div>)?</b>"
+
 
 var urlReg = regexp.MustCompile(urlRegPattern)
 var nameReg = regexp.MustCompile(nameRegPattern)
@@ -63,6 +65,7 @@ var defReg = regexp.MustCompile(defRegPattern)
 var transformationConditionReg = regexp.MustCompile(transformationConditionRegPattern)
 var unitIconReg = regexp.MustCompile(unitIconRegPattern)
 var unitFullImgReg = regexp.MustCompile(unitFullImgRegPattern)
+var dokkanAwakenReg = regexp.MustCompile(dokkanAwakenRegPattern)
 
 func GetURLReg() *regexp.Regexp {
 	return urlReg
@@ -146,6 +149,10 @@ func GetUnitIconReg() *regexp.Regexp {
 
 func GetUnitFullImgReg() *regexp.Regexp {
 	return unitFullImgReg
+}
+
+func GetDokkanAwakenIntoReg() *regexp.Regexp {
+	return dokkanAwakenReg
 }
 
 // Replaces the HTML type icons with the just the
