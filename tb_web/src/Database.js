@@ -1,5 +1,5 @@
-
-const fs = require('fs');
+import { readFileSync } from 'fs';
+import Unit from './Unit.js';
 
  const N_UNITS = [
    "https://dbz-dokkanbattle.fandom.com/wiki/Assassin_in_the_Shadows_Yakon",
@@ -167,11 +167,12 @@ const fs = require('fs');
 ];
 
  const ALL_UNITS = () => {
+   //const Unit = await import("./Unit");
    // First retrieve all JSON objects from file
    const json = () => {
-      const fileName = "../tb_scraper/units.json";
+      const fileName = "../../tb_scraper/units.json";
       try {
-         const data = fs.readFileSync(fileName, "utf-8");
+         const data = readFileSync(fileName, "utf-8");
          return JSON.parse(data);
       } catch (e) {
          console.error(`ERROR: ${e}`);
@@ -181,7 +182,26 @@ const fs = require('fs');
    // Now map the unit's URL to the unit itself
    let allUnits = {};
    json().forEach(unit => {
-      allUnits[unit.URL] = unit;
+      allUnits[unit.URL] = new Unit(
+         unit["URL"],
+         unit["Icon"],
+         unit["Art"],
+         unit["Name"],
+         unit["Rarity"],
+         unit["Type"],
+         unit["Leader Skill"],
+         unit["Passive Skill"],
+         unit["Active Skill"],
+         unit["Super attack"],
+         unit["Ultra Super Attack"],
+         unit["Unit Super Attack"],
+         unit["Unit Super Attack Condition"],
+         unit["Awakens Into"],
+         unit["Categories"],
+         unit["ATK"],
+         unit["DEF"],
+         unit["HP"]
+      );
    });
    return allUnits;
 }
