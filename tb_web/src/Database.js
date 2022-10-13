@@ -1,4 +1,7 @@
-export const N_UNITS = [
+
+const fs = require('fs');
+
+ const N_UNITS = [
    "https://dbz-dokkanbattle.fandom.com/wiki/Assassin_in_the_Shadows_Yakon",
    "https://dbz-dokkanbattle.fandom.com/wiki/Earthborn_Warrior_Saibaiman_(AGL)",
    "https://dbz-dokkanbattle.fandom.com/wiki/Infamous_Army_Red_Ribbon_Army_(AGL)",
@@ -34,7 +37,7 @@ export const N_UNITS = [
    "https://dbz-dokkanbattle.fandom.com/wiki/Simple-Minded_Devil_Cell_Jr._(PHY)"
 ];
 
-export const R_UNITS = [
+ const R_UNITS = [
    "https://dbz-dokkanbattle.fandom.com/wiki/Fancy_Footwork_Android_18",
    "https://dbz-dokkanbattle.fandom.com/wiki/Free_at_Last_Android_17",
    "https://dbz-dokkanbattle.fandom.com/wiki/From_Hell_and_Back_Trunks_(Teen)",
@@ -100,7 +103,7 @@ export const R_UNITS = [
    "https://dbz-dokkanbattle.fandom.com/wiki/Tiny_Terror_Cell_Jr."
 ];
 
-export const SR_UNITS = [
+ const SR_UNITS = [
    "https://dbz-dokkanbattle.fandom.com/wiki/Android_Evolution_Cell_(1st_Form)",
    "https://dbz-dokkanbattle.fandom.com/wiki/Beautiful_but_Deadly_Android_18",
    "https://dbz-dokkanbattle.fandom.com/wiki/Dauntless_Runner_Android_17",
@@ -156,10 +159,30 @@ export const SR_UNITS = [
    "https://dbz-dokkanbattle.fandom.com/wiki/Saiyan_Baptism_Nappa"
 ];
 
-export const SSR_UNITS = [
+ const SSR_UNITS = [
    "https://dbz-dokkanbattle.fandom.com/wiki/Supreme_Warrior_Awakened_Super_Saiyan_Goku",
    "https://dbz-dokkanbattle.fandom.com/wiki/Pride_Regained_Super_Saiyan_Vegeta",
    "https://dbz-dokkanbattle.fandom.com/wiki/Convulsing_Rage_Super_Saiyan_Goku",
    "https://dbz-dokkanbattle.fandom.com/wiki/Super_Attack_Supreme_Super_Saiyan_Vegeta"
 ];
+
+ const ALL_UNITS = () => {
+   // First retrieve all JSON objects from file
+   const json = () => {
+      const fileName = "../tb_scraper/units.json";
+      try {
+         const data = fs.readFileSync(fileName, "utf-8");
+         return JSON.parse(data);
+      } catch (e) {
+         console.error(`ERROR: ${e}`);
+         return e;
+      }
+   }
+   // Now map the unit's URL to the unit itself
+   let allUnits = {};
+   json().forEach(unit => {
+      allUnits[unit.URL] = unit;
+   });
+   return allUnits;
+}
 
