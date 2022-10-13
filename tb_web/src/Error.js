@@ -4,14 +4,8 @@
  * @param {String} s 
  * @returns 
  */
-export const invalidURLMessage = (s) => {
-    return `Invalid URL: ${s}`;
-}
+export const invalidURLMessage = (s) => `Invalid URL: ${s}`;
 
-export const invalidRarityMessage = (s) => {
-    return `Invalid rarity: ${s}\nPossible rarities are: [N, R, SR, SSR, UR, LR]`;
-}
+export const invalidRarityMessage = (s) => `Invalid rarity: ${s}\nPossible rarities are: [N, R, SR, SSR, UR, LR]`;
 
-export const invalidTypeMessage = (s) => {
-    return `Invalid type: ${s}\nPossible types are: [STR, AGL, TEQ, PHY, INT]`;
-}
+export const invalidTypeMessage = (s) => `Invalid type: ${s}\nPossible types are: [STR, AGL, TEQ, PHY, INT]`;
