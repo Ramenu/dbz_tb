@@ -1,5 +1,5 @@
 
-/**
+/** need to work on fixing this
  * @param {String} url The HTTP/HTTPS URL you want to check is valid or not
  * @returns Boolean
  */
@@ -21,11 +21,11 @@ export const isValidURL = (url) =>
  */
 export const isValidType = (type) =>
 {
-    return type == "STR" ||
-           type == "PHY" ||
-           type == "AGL" ||
-           type == "TEQ" ||
-           type == "INT";
+    return type == "Super STR" || type == "Extreme STR" ||
+           type == "Super PHY" || type == "Extreme PHY" ||
+           type == "Super AGL" || type == "Extreme AGL" ||
+           type == "Super TEQ" || type == "Extreme TEQ" ||
+           type == "Super INT" || type == "Extreme INT"
 }
 
 /**
