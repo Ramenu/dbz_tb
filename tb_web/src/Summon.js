@@ -1,6 +1,6 @@
 
 import { Banner, BANNER_TYPE } from "./Banner";
-import { R_UNITS, SR_UNITS, SSR_UNITS } from "./Database";
+import { R_UNITS, SR_UNITS, SSR_UNITS } from "./Database.js";
 import { filterUnitsByRarity } from "./Filter";
 
 const SR_ROLL_MIN = 30;
