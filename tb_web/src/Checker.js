@@ -1,5 +1,5 @@
 
-/** need to work on fixing this
+/**
  * @param {String} url The HTTP/HTTPS URL you want to check is valid or not
  * @returns Boolean
  */
