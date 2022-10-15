@@ -1,7 +1,8 @@
 
-import { Banner, BANNER_TYPE } from "./Banner";
-import { R_UNITS, SR_UNITS, SSR_UNITS } from "./Database.js";
-import { filterUnitsByRarity } from "./Filter";
+import { ALL_BANNERS, Banner, BANNER_TYPE } from "./Banner.js";
+import { R_UNITS, SR_UNITS, SSR_UNITS, ALL_UNITS } from "./Database.js";
+import { filterUnitsByRarity } from "./Filter.js";
+import { randint } from "./Random.js";
 
 const SR_ROLL_MIN = 30;
 const SR_ROLL_MAX = 89;
@@ -18,7 +19,7 @@ const gotSR = (roll) => {
 }
 
 const gotR = (roll) => {
-    return roll >= 0 && roll <= SR_ROLL_MAX - 1;
+    return roll >= 0 && roll <= SR_ROLL_MIN - 1;
 }
 
 const gotFeaturedUnit = (roll) => {
@@ -28,28 +29,67 @@ const gotFeaturedUnit = (roll) => {
 
 /**
  * 
+ * @param {Unit} unit 
+ * @param {Unit[]} featuredUnits 
+ * @returns Boolean
+ */
+const isFeaturedUnit = (unit, featuredUnits) => {
+    featuredUnits.forEach(u => {
+        if (u === unit)
+            return true;
+    });
+    return false;
+}
+
+/**
+ * 
  * @param {Banner} banner 
- * @returns {Unit}
+ * @returns Unit
  */
 const performRareSummon = (banner) =>
 {
     const roll = randint(0, 101);
 
     if (gotR(roll))
-        return R_UNITS[randint(0, R_UNITS.length)];
+        return ALL_UNITS()[R_UNITS[randint(0, R_UNITS.length)]];
     if (gotFeaturedUnit(roll))
     {
-        if (gotSR(roll))
-        {
-            const featuredSrUnits = filterUnitsByRarity(banner.featuredUnits, "SR");
-            return featuredSrUnits[randint(0, featuredSrUnits.length)];
-        }
-        const featuredSsrUnits = filterUnitsByRarity(banner.featuredUnits, "SSR");
-        return featuredSsrUnits[randint(0, featuredSsrUnits.length)];
+        const featured = gotSR(roll) ? filterUnitsByRarity(banner.featuredUnits, "SR") : filterUnitsByRarity(banner.featuredUnits, "SSR");
+        if (featured.length !== 0)
+            return ALL_UNITS()[featured[randint(0, featured.length)]];
     }
 
-    if (gotSR(roll))
-        return SR_UNITS[randint(0, SR_UNITS.length)];
-    return SSR_UNITS[randint(0, SSR_UNITS.length)];
+    // Extremely-low statistical chance for this loop to go on long at all
+    // still... i feel like this deserves a better solution.
+
+    // We need to make sure the non-featured unit pulled is not a featured one
+    while (true)
+    {
+        const pulledUnitURL = gotSR(roll) ? SR_UNITS[randint(0, SR_UNITS.length)] : SSR_UNITS[randint(0, SSR_UNITS.length)];
+        if (!isFeaturedUnit(pulledUnitURL, banner.featuredUnits))
+            return ALL_UNITS()[pulledUnitURL];
+    }
 }
 
+/**
+ * 
+ * @param {Banner} banner 
+ * @returns Banner[]
+ */
+const performMultiSummon = (banner) =>
+{
+    const numOfRolls = 10;
+    let pulledUnits = [];
+
+    for (let i = 0; i < numOfRolls; ++i)
+        pulledUnits.push(performRareSummon(banner));
+    return pulledUnits;
+}
+
+
+const banner = ALL_BANNERS[0];
+const unitsPulled = performMultiSummon(banner);
+
+unitsPulled.forEach(u => {
+    console.log(`Name: ${u.name}\nRarity: ${u.rarity}\n`);
+})
