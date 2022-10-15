@@ -1,5 +1,5 @@
-import { isValidRarity, isValidType } from "./Checker"
-import { invalidRarityMessage, invalidTypeMessage } from "./Error"
+import { isValidRarity, isValidType } from "./Checker.js"
+import { invalidRarityMessage, invalidTypeMessage } from "./Error.js"
 
 /**
  * 
