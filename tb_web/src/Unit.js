@@ -1,6 +1,5 @@
-'use strict';
-import { isValidRarity, isValidType, isValidURL } from "./Checker.js";
-import { invalidRarityMessage, invalidTypeMessage, invalidURLMessage } from "./Error.js";
+import { isValidRarity, isValidType, isValidURL } from "./Checker";
+import { invalidRarityMessage, invalidTypeMessage, invalidURLMessage } from "./Error";
 
 
 export default class Unit
