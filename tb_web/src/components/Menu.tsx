@@ -4,5 +4,7 @@ import styles from "../styles/button.module.scss";
 
 
 export const SummonMenu = () => {
-    return <Button className={styles.tbbutton}>CLICK HERE!</Button>
+    return (
+        <Button className={styles.tbbutton}>CLICK HERE!</Button>
+    );
 }
