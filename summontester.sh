@@ -1,7 +1,7 @@
 #!/bin/bash
 
 summon_min=0
-summon_max=50
+summon_max=100
 cards_per_multi=10
 total_cards_summoned=$(($summon_max * $cards_per_multi))
 
