@@ -1,5 +1,4 @@
-import { readFileSync } from 'fs';
-import Unit from './Unit.js';
+import Unit from './Unit';
 
 export const N_UNITS = [
    "https://dbz-dokkanbattle.fandom.com/wiki/Assassin_in_the_Shadows_Yakon",
@@ -166,22 +165,13 @@ export const SSR_UNITS = [
    "https://dbz-dokkanbattle.fandom.com/wiki/Super_Attack_Supreme_Super_Saiyan_Vegeta"
 ];
 
-export const ALL_UNITS = () => {
-   //const Unit = await import("./Unit");
+const allUnits = () => {
    // First retrieve all JSON objects from file
-   const json = () => {
-      const fileName = "../../tb_scraper/units.json";
-      try {
-         const data = readFileSync(fileName, "utf-8");
-         return JSON.parse(data);
-      } catch (e) {
-         console.error(`ERROR: ${e}`);
-         return e;
-      }
-   }
+   const json = require('./units.json');
+
    // Now map the unit's URL to the unit itself
    let allUnits = {};
-   json().forEach(unit => {
+   json.forEach(unit => {
       allUnits[unit.URL] = new Unit(
          unit["URL"],
          unit["Icon"],
@@ -205,4 +195,15 @@ export const ALL_UNITS = () => {
    });
    return allUnits;
 }
+
+export const getUnit = (url) => allUnits()[url];
+
+
+// Cards new players receive
+export const STARTING_UNITS = [
+   getUnit("https://dbz-dokkanbattle.fandom.com/wiki/Undisputed_Champion_Hercule"),
+   getUnit("https://dbz-dokkanbattle.fandom.com/wiki/Slayer_of_Evil_Videl"),
+   getUnit("https://dbz-dokkanbattle.fandom.com/wiki/Capable_in_Love_and_War_Jewel")
+];
+
 
