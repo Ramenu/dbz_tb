@@ -1,17 +1,11 @@
 import Unit from "./Unit";
 import { getUnit } from "./Database";
 
-export const BANNER_TYPE = {
-    Null: 0x0, // implied as a rare summon by default
-    Dokkanfest: 0x1,
-    FriendSummon: 0x2
-};
-
 enum BannerType 
 {
-    Null = 0x0,
-    DokkanFest = 0x1,
-    FriendSummon = 0x2
+    Null = "NULL",
+    DokkanFest = "DOKKAN_FEST",
+    FriendSummon = "FRIEND_SUMMON"
 }
 
 export class Banner
@@ -32,7 +26,7 @@ export class Banner
 
 export const ALL_BANNERS : Banner[] = [
     new Banner(
-        BANNER_TYPE.Null,
+        BannerType.Null,
         [
             "https://dbz-dokkanbattle.fandom.com/wiki/The_Saiyan_Among_Us_Goku",
             "https://dbz-dokkanbattle.fandom.com/wiki/Genius_of_War_Vegeta",
