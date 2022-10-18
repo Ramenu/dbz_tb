@@ -1,5 +1,5 @@
 
-import { ALL_BANNERS, Banner, BANNER_TYPE } from "./Banner";
+import { ALL_BANNERS, Banner } from "./Banner";
 import { R_UNITS, SR_UNITS, SSR_UNITS, getUnit} from "./Database";
 import { filterUnits } from "./Filter";
 import { randint } from "./Random";
