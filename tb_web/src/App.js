@@ -2,8 +2,8 @@ import logo from './logo.svg';
 import './App.css';
 import React, {useState, useEffect} from 'react';
 import { parse_super_attack } from './pkg/tb_parser';
-import { SummonMenu } from './Menu';
-import { User } from './User';
+import { SummonMenu } from './components/Menu';
+import { User } from './jsdependencies/User';
 
 function App() {
   const [user, setUser] = useState(new User());

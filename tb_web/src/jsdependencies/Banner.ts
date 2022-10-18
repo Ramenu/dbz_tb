@@ -1,3 +1,5 @@
+import Unit from "./Unit";
+import { getUnit } from "./Database";
 
 export const BANNER_TYPE = {
     Null: 0x0, // implied as a rare summon by default
@@ -5,18 +7,30 @@ export const BANNER_TYPE = {
     FriendSummon: 0x2
 };
 
+enum BannerType 
+{
+    Null = 0x0,
+    DokkanFest = 0x1,
+    FriendSummon = 0x2
+}
+
 export class Banner
 {
-    constructor(bannerType, featuredUnits, bannerImage)
+    featuredUnits: Unit[];
+    type: BannerType;
+    image: string;
+    constructor(bannerType : BannerType, featuredUnits : string[], bannerImage : string)
     {
         this.type = bannerType;
-        this.featuredUnits = featuredUnits;
+        featuredUnits.forEach((unitURL) => {
+            this.featuredUnits.push(getUnit(unitURL));
+        })
         this.image = bannerImage;
     }
 }
 
 
-export const ALL_BANNERS = [
+export const ALL_BANNERS : Banner[] = [
     new Banner(
         BANNER_TYPE.Null,
         [

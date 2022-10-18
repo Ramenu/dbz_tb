@@ -1,6 +1,6 @@
 import Unit from './Unit';
 
-export const N_UNITS = [
+export const N_UNITS : string[] = [
    "https://dbz-dokkanbattle.fandom.com/wiki/Assassin_in_the_Shadows_Yakon",
    "https://dbz-dokkanbattle.fandom.com/wiki/Earthborn_Warrior_Saibaiman_(AGL)",
    "https://dbz-dokkanbattle.fandom.com/wiki/Infamous_Army_Red_Ribbon_Army_(AGL)",
@@ -36,7 +36,7 @@ export const N_UNITS = [
    "https://dbz-dokkanbattle.fandom.com/wiki/Simple-Minded_Devil_Cell_Jr._(PHY)"
 ];
 
-export const R_UNITS = [
+export const R_UNITS : string[] = [
    "https://dbz-dokkanbattle.fandom.com/wiki/Fancy_Footwork_Android_18",
    "https://dbz-dokkanbattle.fandom.com/wiki/Free_at_Last_Android_17",
    "https://dbz-dokkanbattle.fandom.com/wiki/From_Hell_and_Back_Trunks_(Teen)",
@@ -102,7 +102,7 @@ export const R_UNITS = [
    "https://dbz-dokkanbattle.fandom.com/wiki/Tiny_Terror_Cell_Jr."
 ];
 
-export const SR_UNITS = [
+export const SR_UNITS : string[] = [
    "https://dbz-dokkanbattle.fandom.com/wiki/Android_Evolution_Cell_(1st_Form)",
    "https://dbz-dokkanbattle.fandom.com/wiki/Beautiful_but_Deadly_Android_18",
    "https://dbz-dokkanbattle.fandom.com/wiki/Dauntless_Runner_Android_17",
@@ -158,19 +158,19 @@ export const SR_UNITS = [
    "https://dbz-dokkanbattle.fandom.com/wiki/Saiyan_Baptism_Nappa"
 ];
 
-export const SSR_UNITS = [
+export const SSR_UNITS : string[] = [
    "https://dbz-dokkanbattle.fandom.com/wiki/Supreme_Warrior_Awakened_Super_Saiyan_Goku",
    "https://dbz-dokkanbattle.fandom.com/wiki/Pride_Regained_Super_Saiyan_Vegeta",
    "https://dbz-dokkanbattle.fandom.com/wiki/Convulsing_Rage_Super_Saiyan_Goku",
    "https://dbz-dokkanbattle.fandom.com/wiki/Super_Attack_Supreme_Super_Saiyan_Vegeta"
 ];
 
-const allUnits = () => {
+const allUnits = () : Unit[] => {
    // First retrieve all JSON objects from file
-   const json = require('./units.json');
+   const json = require('../units.json');
 
    // Now map the unit's URL to the unit itself
-   let allUnits = {};
+   let allUnits : Unit[] = [];
    json.forEach(unit => {
       allUnits[unit.URL] = new Unit(
          unit["URL"],
@@ -196,11 +196,11 @@ const allUnits = () => {
    return allUnits;
 }
 
-export const getUnit = (url) => allUnits()[url];
+export const getUnit = (url : string) : Unit => allUnits()[url];
 
 
 // Cards new players receive
-export const STARTING_UNITS = [
+export const STARTING_UNITS : Unit[] = [
    getUnit("https://dbz-dokkanbattle.fandom.com/wiki/Undisputed_Champion_Hercule"),
    getUnit("https://dbz-dokkanbattle.fandom.com/wiki/Slayer_of_Evil_Videl"),
    getUnit("https://dbz-dokkanbattle.fandom.com/wiki/Capable_in_Love_and_War_Jewel")

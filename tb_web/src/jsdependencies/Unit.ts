@@ -4,29 +4,43 @@ import { invalidRarityMessage, invalidTypeMessage, invalidURLMessage } from "./E
 
 export default class Unit
 {
-    /**
-     * 
-     * @param {String} url 
-     * @param {String} icon should be a link to the icon
-     * @param {String} art should be a link to the artwork
-     * @param {String} name 
-     * @param {String} rarity 
-     * @param {String} type 
-     * @param {String} leaderSkill 
-     * @param {String} passiveSkill 
-     * @param {String} superAtk 
-     * @param {String} awakensInto
-     * @param {String[]} categories 
-     * @param {Number} atk 
-     * @param {Number} def 
-     * @param {Number} hp 
-     */
-    constructor(url, icon, art,
-                name, rarity, type,
-                leaderSkill, passiveSkill,
-                activeSkill, superAtk, 
-                ultraSa, unitSa, unitSaCondition,
-                awakensInto, categories, atk, def, hp) {
+    url : string;
+    icon : string;
+    art : string;
+    name : string;
+    rarity : string;
+    type : string;
+    leaderSkill : string;
+    passiveSkill : string;
+    activeSkill : string;
+    superAtk : string;
+    ultraSa : string;
+    unitSa : string;
+    unitSaCondition : string;
+    awakensInto : string;
+    categories : string[];
+    atk : number;
+    def : number;
+    hp : number;
+
+    constructor(url: string, 
+                icon : string, 
+                art : string,
+                name : string, 
+                rarity : string, 
+                type : string,
+                leaderSkill : string,
+                passiveSkill : string,
+                activeSkill : string, 
+                superAtk : string, 
+                ultraSa : string, 
+                unitSa : string, 
+                unitSaCondition : string,
+                awakensInto : string, 
+                categories : string[], 
+                atk : number, 
+                def : number, 
+                hp : number) {
         
         if (!isValidURL(url))
             throw invalidURLMessage(url);
@@ -34,22 +48,15 @@ export default class Unit
             throw invalidURLMessage(icon);
         if (!isValidURL(art))
             throw invalidURLMessage(art);
-        if (awakensInto !== undefined) // This is allowed, as all objects may not have a dokkan awakening
+        if (awakensInto !== "") // This is allowed, as all objects may not have a dokkan awakening
             if (!isValidURL(awakensInto))
                 throw invalidURLMessage(awakensInto);
         if (!isValidRarity(rarity))
             throw invalidRarityMessage(rarity);
-        if (type !== undefined) // Some units (like selling statues) may not have a SUPER/EXTREME type
+        if (type !== "") // Some units (like selling statues) may not have a SUPER/EXTREME type
             if (!isValidType(type))
                 throw invalidTypeMessage(type);
-        if (!Number.isInteger(atk))
-            throw `Invalid ATK stat: ${atk}`;
-        if (!Number.isInteger(def))
-            throw `Invalid DEF stat: ${def}`;
-        if (!Number.isInteger(hp))
-            throw `Invalid HP stat: ${hp}`;
             
-
         this.url = url;
         this.icon = icon;
         this.art = art;
