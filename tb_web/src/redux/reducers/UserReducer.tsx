@@ -5,7 +5,7 @@ const initialData = () : User => {
     return new User();
 }
 
-
+/*
 export const userReducer = createSlice({
     name: "user",
     initialState: {
@@ -16,4 +16,4 @@ export const userReducer = createSlice({
         }
 
     }
-});
+});*/

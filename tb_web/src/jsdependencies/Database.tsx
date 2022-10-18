@@ -1,4 +1,5 @@
 import Unit from './Unit';
+import json from '../units.json';
 
 export const N_UNITS : string[] = [
    "https://dbz-dokkanbattle.fandom.com/wiki/Assassin_in_the_Shadows_Yakon",
@@ -165,12 +166,8 @@ export const SSR_UNITS : string[] = [
    "https://dbz-dokkanbattle.fandom.com/wiki/Super_Attack_Supreme_Super_Saiyan_Vegeta"
 ];
 
-const allUnits = () : Unit[] => {
-   // First retrieve all JSON objects from file
-   const json = require('../units.json');
-
-   // Now map the unit's URL to the unit itself
-   let allUnits : Unit[] = [];
+const allUnits = () : Record<string, Unit> => {
+   let allUnits : Record<string, Unit> = {};
    json.forEach(unit => {
       allUnits[unit.URL] = new Unit(
          unit["URL"],

@@ -9,15 +9,15 @@ export default class Unit
     art : string;
     name : string;
     rarity : string;
-    type : string;
+    type : string | undefined;
     leaderSkill : string;
     passiveSkill : string;
-    activeSkill : string;
+    activeSkill : string | undefined;
     superAtk : string;
-    ultraSa : string;
-    unitSa : string;
-    unitSaCondition : string;
-    awakensInto : string;
+    ultraSa : string | undefined;
+    unitSa : string | undefined;
+    unitSaCondition : string | undefined;
+    awakensInto : string | undefined;
     categories : string[];
     atk : number;
     def : number;
@@ -28,15 +28,15 @@ export default class Unit
                 art : string,
                 name : string, 
                 rarity : string, 
-                type : string,
+                type : string | undefined,
                 leaderSkill : string,
                 passiveSkill : string,
-                activeSkill : string, 
+                activeSkill : string | undefined, 
                 superAtk : string, 
-                ultraSa : string, 
-                unitSa : string, 
-                unitSaCondition : string,
-                awakensInto : string, 
+                ultraSa : string | undefined, 
+                unitSa : string | undefined, 
+                unitSaCondition : string | undefined,
+                awakensInto : string | undefined, 
                 categories : string[], 
                 atk : number, 
                 def : number, 
@@ -48,12 +48,12 @@ export default class Unit
             throw invalidURLMessage(icon);
         if (!isValidURL(art))
             throw invalidURLMessage(art);
-        if (awakensInto !== "") // This is allowed, as all objects may not have a dokkan awakening
+        if (awakensInto !== undefined) // This is allowed, as all objects may not have a dokkan awakening
             if (!isValidURL(awakensInto))
                 throw invalidURLMessage(awakensInto);
         if (!isValidRarity(rarity))
             throw invalidRarityMessage(rarity);
-        if (type !== "") // Some units (like selling statues) may not have a SUPER/EXTREME type
+        if (type !== undefined) // Some units (like selling statues) may not have a SUPER/EXTREME type
             if (!isValidType(type))
                 throw invalidTypeMessage(type);
             

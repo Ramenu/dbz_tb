@@ -16,7 +16,7 @@ enum BannerType
 
 export class Banner
 {
-    featuredUnits: Unit[];
+    featuredUnits: Unit[] = [];
     type: BannerType;
     image: string;
     constructor(bannerType : BannerType, featuredUnits : string[], bannerImage : string)
