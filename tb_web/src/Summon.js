@@ -1,8 +1,8 @@
 
-import { ALL_BANNERS, Banner, BANNER_TYPE } from "./Banner.js";
-import { R_UNITS, SR_UNITS, SSR_UNITS, ALL_UNITS } from "./Database.js";
-import { filterUnitsByRarity } from "./Filter.js";
-import { randint } from "./Random.js";
+import { ALL_BANNERS, Banner, BANNER_TYPE } from "./Banner";
+import { R_UNITS, SR_UNITS, SSR_UNITS, getUnit} from "./Database";
+import { filterUnitsByRarity } from "./Filter";
+import { randint } from "./Random";
 
 const SR_ROLL_MIN = 30;
 const SR_ROLL_MAX = 89;
@@ -15,7 +15,7 @@ const gotSSR = (roll) => {
 }
 
 const gotSR = (roll) => {
-    return roll >= SR_ROLL_MIN && roll <= SSR_ROLL_MAX;
+    return roll >= SR_ROLL_MIN && roll <= SR_ROLL_MAX;
 }
 
 const gotR = (roll) => {
@@ -34,11 +34,7 @@ const gotFeaturedUnit = (roll) => {
  * @returns Boolean
  */
 const isFeaturedUnit = (unit, featuredUnits) => {
-    featuredUnits.forEach(u => {
-        if (u === unit)
-            return true;
-    });
-    return false;
+    return featuredUnits.includes(unit);
 }
 
 /**
@@ -56,7 +52,7 @@ const performRareSummon = (banner) =>
     {
         const featured = gotSR(roll) ? filterUnitsByRarity(banner.featuredUnits, "SR") : filterUnitsByRarity(banner.featuredUnits, "SSR");
         if (featured.length !== 0)
-            return ALL_UNITS()[featured[randint(0, featured.length)]];
+            return getUnit(featured[randint(0, featured.length)]);
     }
 
     // Extremely-low statistical chance for this loop to go on long at all
@@ -67,14 +63,14 @@ const performRareSummon = (banner) =>
     {
         const pulledUnitURL = gotSR(roll) ? SR_UNITS[randint(0, SR_UNITS.length)] : SSR_UNITS[randint(0, SSR_UNITS.length)];
         if (!isFeaturedUnit(pulledUnitURL, banner.featuredUnits))
-            return ALL_UNITS()[pulledUnitURL];
+            return getUnit(pulledUnitURL);
     }
 }
 
 /**
  * 
  * @param {Banner} banner 
- * @returns Banner[]
+ * @returns Unit[]
  */
 const performMultiSummon = (banner) =>
 {
@@ -92,4 +88,4 @@ const unitsPulled = performMultiSummon(banner);
 
 unitsPulled.forEach(u => {
     console.log(`Name: ${u.name}\nRarity: ${u.rarity}\n`);
-})
+});
