@@ -97,7 +97,7 @@ func main() {
 		unitList[i] = make(chan []Unit)
 		go getUnitsFromCharacterList(urls[i], unitList[i])
 	}
-	file, err := os.Create("./units.json")
+	file, err := os.Create("../tb_web/src/units.json")
 	check(err)
 	defer file.Close()
 	_, e := file.Write([]byte("[\n"))
