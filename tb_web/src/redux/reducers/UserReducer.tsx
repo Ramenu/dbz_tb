@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { User } from "../../jsdependencies/User";
+import { User } from "../../tsdependencies/User";
 
 const initialData = () : User => {
     return new User();
@@ -21,3 +21,6 @@ export const userReducer = createSlice({
 
     }
 });
+
+
+export default userReducer.reducer;

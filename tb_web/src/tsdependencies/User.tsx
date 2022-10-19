@@ -7,6 +7,7 @@ export class User
     rank : number;
     ds : number;
     party : Unit[][];
+    zeni : number;
     constructor()
     {
         this.rank = 1;
@@ -14,5 +15,6 @@ export class User
         this.party = [
             STARTING_UNITS
         ];
+        this.zeni = 1000;
     }
 }
