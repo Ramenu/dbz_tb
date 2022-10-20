@@ -16,7 +16,7 @@ export const userReducer = createSlice({
             state.info.ds += action.payload;
         },
         withdrawStones: (state, action : PayloadAction<number>) => {
-            state.info.ds += action.payload;
+            state.info.ds -= action.payload;
         }
 
     }
