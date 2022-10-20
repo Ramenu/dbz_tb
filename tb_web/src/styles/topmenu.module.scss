@@ -1,7 +1,10 @@
 
+$display-bar-color: rgb(37, 35, 35);
+$display-bar-radius: 15px;
+
 .rankCircle {
-    width: 7.6vw;
-    height: 13vh;
+    width: 7vw;
+    height: 8vh;
     border-radius: 50%;
     background-color: rgb(22, 71, 22);
     position: absolute;
@@ -16,13 +19,17 @@
 
 .rankText {
     color: yellow;
-    font-size: 47px;
+    font-size: 44px;
     position: relative;
-    top: 40px;
-    right: -33px;
+    top: 20px;
+    right: -35px;
     font-family: rank;
-    .rankTextSmall {
-        font-size: 44px;
+    .small {
+        font-size: 37px;
+    }
+    .alignToLeft {
+        position: relative;
+        left: -5px;
     }
 }
 
@@ -31,13 +38,31 @@
     position: absolute;
     width:100%;
     height: 2.5%;
+    margin: auto;
 }
 
 .stoneDisplay {
-    background-color: rgb(37, 35, 35);
-    border-radius: 15px;
-    width: 70px;
+    background-color: $display-bar-color;
+    border-radius: $display-bar-radius;
+    width: 75px;
     margin-left: 90%;
+    margin-right: 0;
+    color: white;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    img {
+        width: 20px;
+        height: 20px;
+    }
+}
+
+.zeniDisplay {
+    position: absolute;
+    background-color: $display-bar-color;
+    border-radius: $display-bar-radius;
+    width: 120px;
+    margin-left: 83%;
     margin-right: 0;
     color: white;
     overflow: hidden;
