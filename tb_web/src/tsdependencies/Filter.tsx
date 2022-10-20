@@ -10,11 +10,15 @@ export enum FilterAction
 
 export const filterUnits = (units : Unit[], filter : string, action : FilterAction) : Unit[] => {
     if (action == FilterAction.Rarity)
+    {
         if (!isValidRarity(filter))
             throw invalidRarityMessage(filter);
+    }
     else
+    {
         if (!isValidType(filter))
             throw invalidTypeMessage(filter);
+    }
     
     let filteredUnits : Unit[] = [];
     units.forEach(unit => {
