@@ -32,6 +32,7 @@ export const TopMenu = () =>
                     <img src={dsLogo} alt="Dragon Stones"/>
                     {user.ds}
                 </div>
+                <progress className={topMenuStyles.expBar} value={user.getExpPercentage()} max="1.0"/>
             </div>
             <div className={topMenuStyles.rankCircle}>
                 {divText}
