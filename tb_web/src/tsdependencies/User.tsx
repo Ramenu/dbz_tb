@@ -22,7 +22,15 @@ export class User
         this.box = STARTING_UNITS;
     }
 
+    totalExpToRankUp() : number {
+        return this.rank * 100;
+    }
+
     canRankUp() : boolean {
-        return this.exp >= this.rank * 100;
+        return this.exp >= this.totalExpToRankUp();
+    }
+
+    getExpPercentage() : number {
+        return this.exp/this.totalExpToRankUp();
     }
 }
