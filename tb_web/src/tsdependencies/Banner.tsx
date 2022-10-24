@@ -32,6 +32,6 @@ export const ALL_BANNERS : Banner[] = [
             "https://dbz-dokkanbattle.fandom.com/wiki/Genius_of_War_Vegeta",
             "https://dbz-dokkanbattle.fandom.com/wiki/Stern_Teacher_Piccolo"
         ],
-        "https://static.wikia.nocookie.net/dbz-dokkanbattle/images/c/c6/Banner_dokkan_1.jpg/revision/latest?cb=20180312125355"
+        "https://static.wikia.nocookie.net/dbz-dokkanbattle/images/c/c6/Banner_dokkan_1.jpg"
     )
 ];
