@@ -27,7 +27,6 @@ export const userSlice = createSlice({
             if (state.box.length >= state.boxSlots)
                 return alert("Your box is currently full. Please buy more slots or remove a unit in your box and try again.");
             const unitReceived : Unit = performSingleSummon(action.payload);
-            console.log(state.exp);
             return {
                 ...state,
                 ds: state.ds - STONES_TO_SINGLE_SUMMON,

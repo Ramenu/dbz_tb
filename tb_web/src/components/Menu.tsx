@@ -1,17 +1,17 @@
 import React from "react"
-import {Button} from "react-bootstrap";
 import buttonStyles from "../styles/button.module.scss";
 import topMenuStyles from "../styles/topmenu.module.scss";
 import bannerStyles from "../styles/banner.module.scss";
 import { useDispatch, useSelector } from "react-redux";
-import { User } from "../tsdependencies/User";
-import { ALL_BANNERS, Banner } from "../tsdependencies/Banner";
+import { getExpPercentage, User } from "../tsdependencies/User";
+import { Banner, ALL_BANNERS } from "../tsdependencies/Banner";
 import { DS_ICON, ZENI_ICON } from "../tsdependencies/ImgSources";
+import { multiSummon, singleSummon } from "../redux/slices/UserSlice";
 
 
 export const TopMenu = () => 
 {
-    const user : User = useSelector((state : any) => state.user.info);
+    const user : User = useSelector((state : any) => state.user);
     let divText : JSX.Element = <div className={topMenuStyles.rankText}>{user.rank}</div>;
     if (user.rank >= 0 && user.rank <= 9)
         divText = (<div className={topMenuStyles.rankText}>
@@ -33,7 +33,7 @@ export const TopMenu = () =>
                     <img src={DS_ICON} alt="Dragon Stones"/>
                     {user.ds}
                 </div>
-                <progress className={topMenuStyles.expBar} value={user.getExpPercentage()} max="1.0"/>
+                <progress className={topMenuStyles.expBar} value={getExpPercentage(user)} max="1.0"/>
             </div>
             <div className={topMenuStyles.rankCircle}>
                 {divText}
@@ -44,6 +44,7 @@ export const TopMenu = () =>
 }
 
 export const BannerDisplay : React.FC<{banner : Banner}> = ({banner}) => {
+    const dispatch = useDispatch();
     return (
         <div className={bannerStyles.banner}>
             <img className={bannerStyles.bannerImg} src={banner.image} alt="Banner"/>
@@ -54,7 +55,7 @@ export const BannerDisplay : React.FC<{banner : Banner}> = ({banner}) => {
                 paddingTop: "5px",
                 left: "40%"
             }}>
-                <button className={buttonStyles.tbbutton}>SINGLE SUMMON (5x)</button>
+                <button className={buttonStyles.tbbutton} onClick={() => dispatch(singleSummon(banner))}>SINGLE SUMMON (5x)</button>
             </div>
             <div style={{
                 position: "relative",
@@ -63,7 +64,7 @@ export const BannerDisplay : React.FC<{banner : Banner}> = ({banner}) => {
                 top: "-52px",
                 left: "54%"
             }}>
-                <button className={buttonStyles.tbbutton}>MULTI SUMMON (50x)</button>
+                <button className={buttonStyles.tbbutton} onClick={() => dispatch(multiSummon(banner))}>MULTI SUMMON (50x)</button>
             </div>
         </div>
     );
@@ -72,7 +73,7 @@ export const BannerDisplay : React.FC<{banner : Banner}> = ({banner}) => {
 export const SummonMenu = () : JSX.Element => {
     return (
         <div>
-        <BannerDisplay banner={ALL_BANNERS[0]}/>
+            <BannerDisplay banner={ALL_BANNERS[0]}/>
         </div>
     );
 }

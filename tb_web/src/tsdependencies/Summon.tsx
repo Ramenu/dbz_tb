@@ -1,7 +1,8 @@
 
-import { ALL_BANNERS, Banner } from "./Banner";
+import { Banner } from "./Banner";
+import { MULTI_SUMMON_ROLL_COUNT } from "./Constants";
 import { R_UNITS, SR_UNITS, SSR_UNITS, getUnit} from "./Database";
-import { filterUnits } from "./Filter";
+import { FilterAction, filterUnits } from "./Filter";
 import { randint } from "./Random";
 import Unit from "./Unit";
 
@@ -24,15 +25,15 @@ const gotR = (roll : number) : boolean => {
 }
 
 const gotFeaturedUnit = (roll : number) : boolean => {
-    return ((roll >= (SR_ROLL_MAX - SR_ROLL_MIN) / 2 + SR_ROLL_MIN) && roll <= SR_ROLL_MAX) ||
-           ((roll >= (SSR_ROLL_MAX - SSR_ROLL_MIN) / 2 + SSR_ROLL_MIN) && roll <= SSR_ROLL_MAX);
+    return ((roll >= Math.round((SR_ROLL_MAX - SR_ROLL_MIN) / 2) + SR_ROLL_MIN) && roll <= SR_ROLL_MAX) ||
+           ((roll >= Math.round((SSR_ROLL_MAX - SSR_ROLL_MIN) / 2) + SSR_ROLL_MIN) && roll <= SSR_ROLL_MAX);
 }
 
 const isFeaturedUnit = (unit : Unit, featuredUnits : Unit[]) : boolean => {
     return featuredUnits.includes(unit);
 }
 
-const performRareSummon = (banner : Banner) : Unit =>
+export const performSingleSummon = (banner : Banner) : Unit =>
 {
     const roll : number = randint(0, 101);
 
@@ -40,7 +41,15 @@ const performRareSummon = (banner : Banner) : Unit =>
         return getUnit(R_UNITS[randint(0, R_UNITS.length)]);
     if (gotFeaturedUnit(roll))
     {
-        const featured : Unit[] = gotSR(roll) ? filterUnits(banner.featuredUnits, "SR", 3) : filterUnits(banner.featuredUnits, "SSR", 5);
+        let featured : Unit[];
+
+        if (banner.featuredUnits.some((unit) => unit.rarity === "SSR"))
+            featured = gotSR(roll) ? 
+                       filterUnits(banner.featuredUnits, "SR", FilterAction.Rarity) : 
+                       filterUnits(banner.featuredUnits, "SSR", FilterAction.Rarity);
+        else
+            featured = filterUnits(banner.featuredUnits, "SR", FilterAction.Rarity);
+
         if (featured.length !== 0)
             return featured[randint(0, featured.length)];
     }
@@ -58,20 +67,11 @@ const performRareSummon = (banner : Banner) : Unit =>
     }
 }
 
-const performMultiSummon = (banner : Banner) : Unit[] =>
+export const performMultiSummon = (banner : Banner) : Unit[] =>
 {
-    const numOfRolls : number = 10;
     let pulledUnits : Unit[] = [];
 
-    for (let i = 0; i < numOfRolls; ++i)
-        pulledUnits.push(performRareSummon(banner));
+    for (let i = 0; i < MULTI_SUMMON_ROLL_COUNT; ++i)
+        pulledUnits.push(performSingleSummon(banner));
     return pulledUnits;
 }
-
-
-const banner : Banner = ALL_BANNERS[0];
-const unitsPulled : Unit[] = performMultiSummon(banner);
-
-unitsPulled.forEach(u => {
-    console.log(`Name: ${u.name}\nRarity: ${u.rarity}\n`);
-});

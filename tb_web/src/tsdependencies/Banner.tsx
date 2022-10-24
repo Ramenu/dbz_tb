@@ -3,9 +3,11 @@ import { getUnit } from "./Database";
 
 enum BannerType 
 {
-    Null = "NULL",
-    DokkanFest = "DOKKAN_FEST",
-    FriendSummon = "FRIEND_SUMMON"
+    Null = 0x0,
+    RareSummon = 0x1,
+    DokkanFest = 0x2,
+    FriendSummon = 0x4,
+    DiscountSummon = 0x8
 }
 
 export class Banner
@@ -18,7 +20,7 @@ export class Banner
         this.type = bannerType;
         featuredUnits.forEach((unitURL) => {
             this.featuredUnits.push(getUnit(unitURL));
-        })
+        });
         this.image = bannerImage;
     }
 }
@@ -26,7 +28,7 @@ export class Banner
 
 export const ALL_BANNERS : Banner[] = [
     new Banner(
-        BannerType.Null,
+        BannerType.RareSummon,
         [
             "https://dbz-dokkanbattle.fandom.com/wiki/The_Saiyan_Among_Us_Goku",
             "https://dbz-dokkanbattle.fandom.com/wiki/Genius_of_War_Vegeta",
