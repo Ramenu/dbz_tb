@@ -2,10 +2,12 @@ import React from "react"
 import {Button} from "react-bootstrap";
 import buttonStyles from "../styles/button.module.scss";
 import topMenuStyles from "../styles/topmenu.module.scss";
+import bannerStyles from "../styles/banner.module.scss";
 import { useDispatch, useSelector } from "react-redux";
 import dsLogo from "../assets/images/dragon_stone.png";
 import zeniLogo from "../assets/images/zeni.png";
 import { User } from "../tsdependencies/User";
+import { ALL_BANNERS, Banner } from "../tsdependencies/Banner";
 
 
 export const TopMenu = () => 
@@ -42,8 +44,36 @@ export const TopMenu = () =>
 
 }
 
-export const SummonMenu = () => {
+export const BannerDisplay : React.FC<{banner : Banner}> = ({banner}) => {
     return (
-        <Button className={buttonStyles.tbbutton}>CLICK HERE!</Button>
+        <div className={bannerStyles.banner}>
+            <img className={bannerStyles.bannerImg} src={banner.image} alt="Banner"/>
+            <div style={{
+                position: "relative",
+                width: "200px",
+                height: "50px",
+                paddingTop: "5px",
+                left: "40%"
+            }}>
+                <button className={buttonStyles.tbbutton}>SINGLE SUMMON (5x)</button>
+            </div>
+            <div style={{
+                position: "relative",
+                width: "200px",
+                height: "50px",
+                top: "-52px",
+                left: "54%"
+            }}>
+                <button className={buttonStyles.tbbutton}>MULTI SUMMON (50x)</button>
+            </div>
+        </div>
+    );
+}
+
+export const SummonMenu = () : JSX.Element => {
+    return (
+        <div>
+        <BannerDisplay banner={ALL_BANNERS[0]}/>
+        </div>
     );
 }
