@@ -10,6 +10,7 @@ export class User
     box : Unit[];
     zeni : number;
     exp : number;
+    boxSlots : number;
     constructor()
     {
         this.rank = 1;
@@ -20,17 +21,21 @@ export class User
         this.zeni = 1000;
         this.exp = 0;
         this.box = STARTING_UNITS;
+        this.boxSlots = 100;
     }
 
-    totalExpToRankUp() : number {
-        return this.rank * 100;
-    }
+}
 
-    canRankUp() : boolean {
-        return this.exp >= this.totalExpToRankUp();
-    }
+// Methods do not work with redux, maybe because they can't be serialized?
+// I don't know.
+export const totalExpToRankUp = (user : User) : number => {
+    return user.rank * 100;
+}
 
-    getExpPercentage() : number {
-        return this.exp/this.totalExpToRankUp();
-    }
+export const canRankUp = (user : User) : boolean => {
+    return user.exp >= totalExpToRankUp(user);
+}
+
+export const getExpPercentage = (user : User) : number =>{
+    return user.exp/totalExpToRankUp(user);
 }
