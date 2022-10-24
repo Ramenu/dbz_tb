@@ -4,10 +4,9 @@ import buttonStyles from "../styles/button.module.scss";
 import topMenuStyles from "../styles/topmenu.module.scss";
 import bannerStyles from "../styles/banner.module.scss";
 import { useDispatch, useSelector } from "react-redux";
-import dsLogo from "../assets/images/dragon_stone.png";
-import zeniLogo from "../assets/images/zeni.png";
 import { User } from "../tsdependencies/User";
 import { ALL_BANNERS, Banner } from "../tsdependencies/Banner";
+import { DS_ICON, ZENI_ICON } from "../tsdependencies/ImgSources";
 
 
 export const TopMenu = () => 
@@ -27,11 +26,11 @@ export const TopMenu = () =>
         <div>
             <div className={topMenuStyles.menuBar}>
                 <div className={topMenuStyles.zeniDisplay}>
-                    <img src={zeniLogo} alt="Zeni"/>
+                    <img src={ZENI_ICON} alt="Zeni"/>
                     {user.zeni}
                 </div>
                 <div className={topMenuStyles.stoneDisplay}>
-                    <img src={dsLogo} alt="Dragon Stones"/>
+                    <img src={DS_ICON} alt="Dragon Stones"/>
                     {user.ds}
                 </div>
                 <progress className={topMenuStyles.expBar} value={user.getExpPercentage()} max="1.0"/>
