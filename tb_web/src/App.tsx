@@ -6,7 +6,10 @@ function App() {
   const sa = parse_super_attack("causes immense damage to enemy");
   console.log(sa.modifier);
   return (
-    <TopMenu/>
+    <div>
+      <TopMenu/>
+      <SummonMenu/>
+    </div>
   );
 }
 
