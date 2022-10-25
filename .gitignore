@@ -10,6 +10,7 @@
 /tb_parser/pkg/
 /tb_parser/wasm-pack.log
 /tb_parser/tests
+/tb_parser/.vscode
 
 # testing
 /coverage
