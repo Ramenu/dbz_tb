@@ -1,9 +1,10 @@
 use wasm_bindgen::prelude::*;
 use regex::Regex;
 use lazy_static::lazy_static;
-use std::fmt;
+use std::{fmt};
+use {crate::flags, crate::flags::EffectFlag, crate::effectparser};
 
-use crate::{tokenizer, effectparser::{self, EFF_RAISES, EFF_GREATLY, EFF_LOWERS, EFF_ALL, EFF_ENEMY, EFF_ATK, EFF_DEF, NULL}, effect};
+use crate::{tokenizer};
 
 pub const MAX_SA_LEVEL : i32 = 25;
 
@@ -20,7 +21,7 @@ lazy_static! {
 pub struct SaInfo
 {
     modifier : Modifier,
-    effect : u32,
+    effect : EffectFlag,
     atk_buff : f32,
     def_buff : f32,
     atkdef_buff_turn_count : u32, // Includes attack/def buff count in same variable
@@ -40,7 +41,7 @@ impl SaInfo
     #[wasm_bindgen(constructor)]
     pub fn new() -> SaInfo {
         return SaInfo { modifier: Modifier::Low, 
-                        effect: effect::EFFECT_NULL, 
+                        effect: EffectFlag::EFFECT_NULL, 
                         atk_buff: 0.0, def_buff: 0.0, 
                         atkdef_buff_turn_count: 0, 
                         turns_to_stun: 0, 
@@ -57,7 +58,7 @@ impl SaInfo
         return self.modifier;
     }
     #[wasm_bindgen(getter = effect)]
-    pub fn get_effect(&self) -> u32 {
+    pub fn get_effect(&self) -> EffectFlag {
         return self.effect;
     }
     #[wasm_bindgen(getter = atk_buff)]
@@ -192,24 +193,23 @@ pub fn get_sa_atk_stat(atk : f32, modifier_dmg : f32, sa_level : i32) -> f32
 fn get_sa_stat_change_eff(eff : effectparser::StatEffect, sa : &mut SaInfo)
 {
     let mut additional_boost = 0.0;
-    let mut boost = 0.0f32;
-    if eff.get_stat_effect()&EFF_GREATLY != NULL {
-        additional_boost = effect::EFF_GREATLY_INC_OR_DEC_MODIFIER - effect::EFF_INC_OR_DEC_MODIFIER;
+    let mut boost = 0.0;
+    if eff.get_stat_effect()&EffectFlag::EFFECT_GREATLY != EffectFlag::EFFECT_NULL {
+        additional_boost = flags::GREATLY_INC_OR_DEC_MODIFIER_PERCENTAGE - flags::INC_OR_DEC_MODIFIER_PERCENTAGE;
     }
-    if eff.get_stat_effect()&EFF_RAISES != NULL {
-        boost += effect::EFF_INC_OR_DEC_MODIFIER + additional_boost;
+    if eff.get_stat_effect()&EffectFlag::EFFECT_RAISES != EffectFlag::EFFECT_NULL {
+        boost += flags::INC_OR_DEC_MODIFIER_PERCENTAGE + additional_boost;
     }
-    if eff.get_stat_effect()&EFF_LOWERS != NULL {
-        boost -= effect::EFF_INC_OR_DEC_MODIFIER + additional_boost;
+    if eff.get_stat_effect()&EffectFlag::EFFECT_LOWERS != EffectFlag::EFFECT_NULL {
+        boost -= flags::INC_OR_DEC_MODIFIER_PERCENTAGE + additional_boost;
     }
-    if eff.get_stat_effect()&EFF_ALL != NULL {
-        sa.effect |= effect::EFFECT_ATK_ALL_ENEMIES;
+    if eff.get_stat_effect()&EffectFlag::EFFECT_ATK_ALL_ENEMIES != EffectFlag::EFFECT_NULL {
+        sa.effect |= EffectFlag::EFFECT_ATK_ALL_ENEMIES;
     }
-
-    if eff.get_stat_effect()&EFF_ATK != NULL {
+    if eff.get_stat_effect()&EffectFlag::EFFECT_ATK != EffectFlag::EFFECT_NULL {
         sa.atk_buff += boost;
     }
-    if eff.get_stat_effect()&EFF_DEF != NULL {
+    if eff.get_stat_effect()&EffectFlag::EFFECT_DEF != EffectFlag::EFFECT_NULL {
         sa.def_buff += boost;
     }
 
@@ -247,12 +247,12 @@ pub fn parse_super_attack(sa_eff : &str) -> SaInfo
             let stun_eff = effectparser::get_stun_effect(&mut s, true);
             sa.stun_chance = stun_eff.get_eff_chance();
             sa.turns_to_stun = stun_eff.get_eff_turn_count();
-            sa.effect |= stun_eff.get_on_all_enemies();
+            sa.effect |= stun_eff.get_eff();
 
             let seal_eff = effectparser::get_seal_effect(&mut s, true);
             sa.seal_chance = seal_eff.get_eff_chance();
             sa.turns_to_seal = seal_eff.get_eff_turn_count();
-            sa.effect |= seal_eff.get_on_all_enemies();
+            sa.effect |= seal_eff.get_eff();
         }
     }
     return sa;

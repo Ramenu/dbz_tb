@@ -1,6 +1,6 @@
 use crate::{tokenizer, sa};
-use std::arch::asm;
 use crate::effectparser::*;
+use crate::flags::*;
 
 #[cfg(debug_assertions)]
  const CHANCE_COMBINATIONS : [(&str, u32); 8] = [
@@ -107,8 +107,6 @@ pub fn test_sa_retrieval()
 #[cfg(debug_assertions)]
 pub fn test_raises_or_lowers_stat()
 {
-    use crate::effectparser::{raises_or_lowers_stat, stat_effect_flag_meaning};
- 
     let status_effects : [&str; 10] = [
         "raises atk",
         "raises def",
@@ -171,19 +169,17 @@ pub fn test_super_attack_parsing(extensive_test : bool)
         pub def_buff : f32
     }
 
-    use crate::effect::{EFF_INC_OR_DEC_MODIFIER, EFF_GREATLY_INC_OR_DEC_MODIFIER};
-
     const END_WORDS : [(&str, StatChange); 9] = [
         ("", StatChange{atk_buff: 0.0, def_buff: 0.0}),
-        (" and lowers atk", StatChange{atk_buff: -EFF_INC_OR_DEC_MODIFIER, def_buff: 0.0}),
-        (" and lowers def", StatChange{atk_buff: 0.0, def_buff: -EFF_INC_OR_DEC_MODIFIER}),
-        (" and greatly lowers atk", StatChange{atk_buff: -EFF_GREATLY_INC_OR_DEC_MODIFIER, def_buff: 0.0}),
-        (" and greatly lowers def", StatChange{atk_buff: 0.0, def_buff: -EFF_GREATLY_INC_OR_DEC_MODIFIER}),
+        (" and lowers atk", StatChange{atk_buff: -INC_OR_DEC_MODIFIER_PERCENTAGE, def_buff: 0.0}),
+        (" and lowers def", StatChange{atk_buff: 0.0, def_buff: -INC_OR_DEC_MODIFIER_PERCENTAGE}),
+        (" and greatly lowers atk", StatChange{atk_buff: -GREATLY_INC_OR_DEC_MODIFIER_PERCENTAGE, def_buff: 0.0}),
+        (" and greatly lowers def", StatChange{atk_buff: 0.0, def_buff: -GREATLY_INC_OR_DEC_MODIFIER_PERCENTAGE}),
 
-        (" and raises atk", StatChange{atk_buff: EFF_INC_OR_DEC_MODIFIER, def_buff: 0.0}),
-        (" and raises def", StatChange{atk_buff: 0.0, def_buff: EFF_INC_OR_DEC_MODIFIER}),
-        (" and greatly raises atk", StatChange{atk_buff: EFF_GREATLY_INC_OR_DEC_MODIFIER, def_buff: 0.0}),
-        (" and greatly raises def", StatChange{atk_buff: 0.0, def_buff: EFF_GREATLY_INC_OR_DEC_MODIFIER})
+        (" and raises atk", StatChange{atk_buff: INC_OR_DEC_MODIFIER_PERCENTAGE, def_buff: 0.0}),
+        (" and raises def", StatChange{atk_buff: 0.0, def_buff: INC_OR_DEC_MODIFIER_PERCENTAGE}),
+        (" and greatly raises atk", StatChange{atk_buff: GREATLY_INC_OR_DEC_MODIFIER_PERCENTAGE, def_buff: 0.0}),
+        (" and greatly raises def", StatChange{atk_buff: 0.0, def_buff: GREATLY_INC_OR_DEC_MODIFIER_PERCENTAGE})
     ];
 
     for start in START_WORDS 
@@ -209,19 +205,19 @@ pub fn test_super_attack_parsing(extensive_test : bool)
 pub fn test_get_stun_effect()
 {
 
-    const END_COMBINATIONS : [(&str, u32); 7] = [
-        ("to stun the enemy", 0),
-        ("to stun all enemies", 1),
-        ("stun the enemy", 0),
-        ("stun all enemies", 1),
-        ("of stunning the attacked enemy", 0),
-        ("to stun the attacked enemy", 0),
-        ("stun the attacked enemy within the same turn", 0)
+    let end_combinations : [(&str, EffectFlag); 7] = [
+        ("to stun the enemy", EffectFlag::EFFECT_NULL),
+        ("to stun all enemies", EffectFlag::EFFECT_STUN|EffectFlag::EFFECT_STAT_TARGET_ALL),
+        ("stun the enemy", EffectFlag::EFFECT_NULL),
+        ("stun all enemies", EffectFlag::EFFECT_STUN|EffectFlag::EFFECT_STAT_TARGET_ALL),
+        ("of stunning the attacked enemy", EffectFlag::EFFECT_NULL),
+        ("to stun the attacked enemy", EffectFlag::EFFECT_NULL),
+        ("stun the attacked enemy within the same turn", EffectFlag::EFFECT_NULL)
     ];
 
     for chance in CHANCE_COMBINATIONS
     {
-        for end in END_COMBINATIONS
+        for end in end_combinations
         {
             for turn_count in N_TURNS
             {
@@ -229,7 +225,7 @@ pub fn test_get_stun_effect()
                 let eff = get_stun_effect(&mut s, false);
 
                 assert_eq!(chance.1, eff.eff_chance);
-                assert_eq!(end.1, eff.on_all_enemies);
+                assert_eq!(end.1, eff.eff);
                 assert_eq!(turn_count.1, eff.eff_turn_count);
             }
         }
@@ -242,18 +238,17 @@ pub fn test_get_stun_effect()
 #[cfg(debug_assertions)]
 pub fn test_get_seal_effect()
 {
-    use crate::effect::EFFECT_SEAL_ON_ALL_ENEMIES;
     let effects : [(&str, EffectChance); 10] = [
-        ("rare chance to seal all enemies' super attack", EffectChance{eff_chance: RARE_CHANCE_PERCENTAGE, eff_turn_count: 1, on_all_enemies: EFFECT_SEAL_ON_ALL_ENEMIES}),
-        ("may seal enemy's super attack", EffectChance{eff_chance: MAY_CHANCE_PERCENTAGE, eff_turn_count: 1, on_all_enemies: 0}),
-        ("seals super attack", EffectChance{eff_chance: 100, eff_turn_count: 1, on_all_enemies: 0}),
-        ("medium chance to seal super attack", EffectChance{eff_chance: MEDIUM_CHANCE_PERCENTAGE, eff_turn_count: 1, on_all_enemies: 0}),
-        ("high chance to seal the attacked enemy's super attack", EffectChance{eff_chance: HIGH_CHANCE_PERCENTAGE, eff_turn_count: 1, on_all_enemies: 0}),
-        ("high chance of sealing super attack", EffectChance{eff_chance: HIGH_CHANCE_PERCENTAGE, eff_turn_count: 1, on_all_enemies: 0}),
-        ("medium chance of sealing super attack", EffectChance{eff_chance: MEDIUM_CHANCE_PERCENTAGE, eff_turn_count: 1, on_all_enemies: 0}),
-        ("seals that enemy's super attack", EffectChance{eff_chance: 100, eff_turn_count: 1, on_all_enemies: 0}),
-        ("high chance of sealing super attack for 3 turns", EffectChance{eff_chance: HIGH_CHANCE_PERCENTAGE, eff_turn_count: 3, on_all_enemies: 0}),
-        ("empty string", EffectChance{eff_chance: 0, eff_turn_count: 0, on_all_enemies: 0})
+        ("rare chance to seal all enemies' super attack", EffectChance{eff_chance: RARE_CHANCE_PERCENTAGE, eff_turn_count: 1, eff: EffectFlag::EFFECT_SEAL|EffectFlag::EFFECT_STAT_TARGET_ALL}),
+        ("may seal enemy's super attack", EffectChance{eff_chance: MAY_CHANCE_PERCENTAGE, eff_turn_count: 1, eff: EffectFlag::EFFECT_NULL}),
+        ("seals super attack", EffectChance{eff_chance: 100, eff_turn_count: 1, eff: EffectFlag::EFFECT_NULL}),
+        ("medium chance to seal super attack", EffectChance{eff_chance: MEDIUM_CHANCE_PERCENTAGE, eff_turn_count: 1, eff: EffectFlag::EFFECT_NULL}),
+        ("high chance to seal the attacked enemy's super attack", EffectChance{eff_chance: HIGH_CHANCE_PERCENTAGE, eff_turn_count: 1, eff: EffectFlag::EFFECT_NULL}),
+        ("high chance of sealing super attack", EffectChance{eff_chance: HIGH_CHANCE_PERCENTAGE, eff_turn_count: 1, eff: EffectFlag::EFFECT_NULL}),
+        ("medium chance of sealing super attack", EffectChance{eff_chance: MEDIUM_CHANCE_PERCENTAGE, eff_turn_count: 1, eff: EffectFlag::EFFECT_NULL}),
+        ("seals that enemy's super attack", EffectChance{eff_chance: 100, eff_turn_count: 1, eff: EffectFlag::EFFECT_NULL}),
+        ("high chance of sealing super attack for 3 turns", EffectChance{eff_chance: HIGH_CHANCE_PERCENTAGE, eff_turn_count: 3, eff: EffectFlag::EFFECT_NULL}),
+        ("empty string", EffectChance{eff_chance: 0, eff_turn_count: 0, eff: EffectFlag::EFFECT_NULL})
     ];
 
     for eff in effects
@@ -262,7 +257,7 @@ pub fn test_get_seal_effect()
         let test_eff = get_seal_effect(&mut s, false);
         assert_eq!(eff.1.eff_chance, test_eff.eff_chance);
         assert_eq!(eff.1.eff_turn_count, test_eff.eff_turn_count);
-        assert_eq!(eff.1.on_all_enemies, test_eff.on_all_enemies);
+        assert_eq!(eff.1.eff, test_eff.eff);
     }
 
     pass("test_get_seal_effect()");

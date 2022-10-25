@@ -2,7 +2,8 @@ mod tokenizer;
 mod effectparser;
 mod sa;
 mod tester;
-mod effect;
+mod flags;
+mod leaderskill;
 
 fn main() 
 {

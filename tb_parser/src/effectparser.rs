@@ -1,19 +1,8 @@
 use std::default::Default;
 
-use crate::{tokenizer, sa::{self, SaInfo}, effect};
+use crate::{tokenizer, sa::{self, SaInfo}, flags::{self, EffectFlag}};
 use lazy_static::lazy_static;
 use regex::Regex;
-
-
-pub const NULL : u32 = 0x0;
-pub const EFF_ATK : u32 = 0x1;
-pub const EFF_DEF : u32 = 0x2;
-pub const EFF_RAISES : u32 = 0x4;
-pub const EFF_LOWERS : u32 = 0x8;
-pub const EFF_GREATLY : u32 = 0x10;
-pub const EFF_ENEMY : u32 = 0x20;
-pub const EFF_ALL : u32 = 0x40;
-
 
 pub const ULTRA_RARE_CHANCE_PERCENTAGE : u32 = 1;
 pub const RARE_CHANCE_PERCENTAGE : u32 = 15;
@@ -23,9 +12,10 @@ pub const MEDIUM_CHANCE_PERCENTAGE : u32 = 30;
 pub const HIGH_CHANCE_PERCENTAGE : u32 = 50;
 pub const GREAT_CHANCE_PERCENTAGE : u32 = 70;
 
+
 pub struct StatEffect
 {
-    stat_eff : u32,
+    stat_eff : EffectFlag,
     stat_eff_turn_count : u32,
 }
 
@@ -34,7 +24,7 @@ pub struct EffectChance
 {
     pub eff_chance : u32,
     pub eff_turn_count : u32,
-    pub on_all_enemies : u32
+    pub eff : EffectFlag
 }
 
 impl EffectChance
@@ -45,14 +35,14 @@ impl EffectChance
     pub fn get_eff_turn_count(&self) -> u32 {
         return self.eff_turn_count;
     }
-    pub fn get_on_all_enemies(&self) -> u32 {
-        return self.on_all_enemies;
+    pub fn get_eff(&self) -> EffectFlag {
+        return self.eff;
     }
 }
 
 impl StatEffect
 {
-    pub fn get_stat_effect(&self) -> u32 {
+    pub fn get_stat_effect(&self) -> EffectFlag {
         return self.stat_eff;
     }
 
@@ -66,33 +56,33 @@ impl StatEffect
 /// use this to check and make sure the status
 /// effect flags are working properly.
 #[cfg(debug_assertions)]
-pub fn stat_effect_flag_meaning(stat_eff : u32)
+pub fn stat_effect_flag_meaning(stat_eff : EffectFlag)
 {
     let mut s = String::new();
-    if stat_eff&EFF_GREATLY != NULL {
+    if stat_eff&EffectFlag::EFFECT_GREATLY != EffectFlag::EFFECT_NULL {
         s += "/greatly"
     }
-    if stat_eff&EFF_RAISES != NULL {
+    if stat_eff&EffectFlag::EFFECT_RAISES != EffectFlag::EFFECT_NULL {
         s += "/raises";
     }
-    if stat_eff&EFF_LOWERS != NULL {
+    if stat_eff&EffectFlag::EFFECT_LOWERS != EffectFlag::EFFECT_NULL {
         s += "/lowers";
     }
-    if stat_eff&EFF_ALL != NULL {
+    if stat_eff&EffectFlag::EFFECT_ATK_ALL_ENEMIES != EffectFlag::EFFECT_NULL {
         s += "/all";
     }
-    if stat_eff&EFF_ENEMY != NULL {
+    if stat_eff&EffectFlag::EFFECT_ENEMY != EffectFlag::EFFECT_NULL {
         s += "/enemy";
     }
-    if stat_eff&EFF_ATK != NULL {
+    if stat_eff&EffectFlag::EFFECT_ATK != EffectFlag::EFFECT_NULL {
         s += "/atk";
     }
-    if stat_eff&EFF_DEF != NULL {
+    if stat_eff&EffectFlag::EFFECT_DEF != EffectFlag::EFFECT_NULL {
         s += "/def";
     }
 
-    if s.is_empty() { // stat_eff == NULL
-        assert!(stat_eff == NULL);
+    if s.is_empty() { // stat_eff == EffectFlag::EFFECT_NULL
+        assert!(stat_eff == EffectFlag::EFFECT_NULL);
     }
 
     println!("Status effect: {}", s);
@@ -100,37 +90,37 @@ pub fn stat_effect_flag_meaning(stat_eff : u32)
 
 
 /// Returns the stat effect as a flag.
-fn get_stat_effect(s : &str) -> Option<u32>
+fn get_stat_effect(s : &str) -> Option<EffectFlag>
 {
-    let mut eff : u32 = NULL;
+    let mut eff : EffectFlag = EffectFlag::EFFECT_NULL;
 
     if s.contains("raises") || s.contains("increases") {
-        eff |= EFF_RAISES;
+        eff |= EffectFlag::EFFECT_RAISES;
     } else if s.contains("lowers") || s.contains("decreases") {
-        eff |= EFF_LOWERS|EFF_ENEMY;
+        eff |= EffectFlag::EFFECT_LOWERS|EffectFlag::EFFECT_ENEMY;
     } 
 
     if s.contains("greatly") {
-        eff |= EFF_GREATLY;
+        eff |= EffectFlag::EFFECT_GREATLY;
     }
 
     if s.contains("enemy") || s.contains("enemies") {
-        eff |= EFF_ENEMY;
+        eff |= EffectFlag::EFFECT_ENEMY;
     }
 
     if s.contains("all") {
-        eff |= EFF_ALL;
+        eff |= EffectFlag::EFFECT_ATK_ALL_ENEMIES;
     }
 
     if s.contains("atk") {
-        eff |= EFF_ATK;
+        eff |= EffectFlag::EFFECT_ATK;
     }
 
     if s.contains("def") {
-        eff |= EFF_DEF;
+        eff |= EffectFlag::EFFECT_DEF;
     }
 
-    if eff == NULL {
+    if eff == EffectFlag::EFFECT_NULL {
         return None;
     }
 
@@ -242,8 +232,8 @@ pub fn get_stun_effect(s : &mut String, advance : bool) -> EffectChance
 
         let stun_chance = get_chance_percentage(chance);
         let targets_all = match targets_all_enemies(target) {
-            true => effect::EFFECT_STUN_ON_ALL_ENEMIES,
-            false => effect::EFFECT_NULL
+            true => EffectFlag::EFFECT_STUN|EffectFlag::EFFECT_STAT_TARGET_ALL,
+            false => EffectFlag::EFFECT_NULL
         };
 
         if advance {
@@ -262,11 +252,11 @@ pub fn get_stun_effect(s : &mut String, advance : bool) -> EffectChance
 
         return EffectChance { eff_chance: stun_chance, 
                               eff_turn_count: num_turns, 
-                              on_all_enemies: targets_all };
+                              eff: targets_all };
 
     }
 
-    return EffectChance { eff_chance: 0, eff_turn_count: 0, on_all_enemies: 0 };
+    return EffectChance { eff_chance: 0, eff_turn_count: 0, eff: EffectFlag::EFFECT_NULL };
 }
 
 
@@ -285,7 +275,7 @@ pub fn get_seal_effect(s : &mut String, advance : bool) -> EffectChance
     {
         let mut num_turns;
         let mut seal_chance : u32 = 100; // Seal chance is guaranteed to be 100% if no match is found
-        let mut targets_all : u32 = effect::EFFECT_NULL; // Guaranteed to hit one enemy only if no match is found
+        let mut targets_all : EffectFlag = EffectFlag::EFFECT_NULL; // Guaranteed to hit one enemy only if no match is found
         let capture_match = capture.expect("Failed to find match");
         let chance = capture_match.get(1);
         let target = capture_match.get(2);
@@ -295,8 +285,8 @@ pub fn get_seal_effect(s : &mut String, advance : bool) -> EffectChance
         }
         if target.is_some() {
             targets_all = match targets_all_enemies(target.expect("Failed to get second capture").as_str()) {
-                true => effect::EFFECT_SEAL_ON_ALL_ENEMIES,
-                false => effect::EFFECT_NULL
+                true => EffectFlag::EFFECT_SEAL|EffectFlag::EFFECT_STAT_TARGET_ALL,
+                false => EffectFlag::EFFECT_NULL
             };
         }
 
@@ -316,9 +306,9 @@ pub fn get_seal_effect(s : &mut String, advance : bool) -> EffectChance
 
         return EffectChance { eff_chance: seal_chance, 
                               eff_turn_count: num_turns, 
-                              on_all_enemies: targets_all };
+                              eff: targets_all };
 
     }
 
-    return EffectChance { eff_chance: 0, eff_turn_count: 0, on_all_enemies: 0 };
+    return EffectChance { eff_chance: 0, eff_turn_count: 0, eff: EffectFlag::EFFECT_NULL };
 }
