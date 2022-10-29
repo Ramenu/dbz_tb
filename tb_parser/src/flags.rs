@@ -11,33 +11,78 @@ bitflags!
     #[derive(Default)]
     pub struct EffectFlag : u32
     {
-        const EFFECT_NULL = 0x0;
-        const EFFECT_STUN = 0x1;
-        const EFFECT_SEAL = 0x2;
-        const EFFECT_ATK_ALL_ENEMIES = 0x4;
-        const EFFECT_ATK = 0x8;
-        const EFFECT_DEF = 0x10;
-        const EFFECT_RAISES = 0x20;
-        const EFFECT_LOWERS = 0x40;
-        const EFFECT_GREATLY = 0x80;
-        const EFFECT_STAT_TARGET_ALL = 0x100; // This is not the same as 'EFFECT_ATK_ALL_ENEMIES' this applies to stun/seal, etc.
-        const EFFECT_ENEMY = 0x200;
-        const EFFECT_INC_OR_DEC_MODIFIER = 0x400;
+        const NONE = 0x0;
+        const STUN = 0x1;
+        const SEAL = 0x2;
+        const ATK_ALL_ENEMIES = 0x4;
+        const ATK = 0x8;
+        const DEF = 0x10;
+        const RAISES = 0x20;
+        const LOWERS = 0x40;
+        const GREATLY = 0x80;
+        const STAT_TARGET_ALL = 0x100; // This is not the same as 'EFFECT_ATK_ALL_ENEMIES' this applies to stun/seal, etc.
+        const ENEMY = 0x200;
+        const INC_OR_DEC_MODIFIER = 0x400;
     }
 
     #[wasm_bindgen]
     #[derive(Default)]
     pub struct TypeFlag : u32
     {
-        const TYPE_NONE = 0x0;
-        const TYPE_SUPER = 0x1;
-        const TYPE_EXTREME = 0x2;
-        const TYPE_STR = 0x4;
-        const TYPE_AGL = 0x8;
-        const TYPE_TEQ = 0x10;
-        const TYPE_PHY = 0x20;
-        const TYPE_INT = 0x40;
+        const NONE = 0x0;
+        const SUPER = 0x1;
+        const EXTREME = 0x2;
+        const STR = 0x4;
+        const AGL = 0x8;
+        const TEQ = 0x10;
+        const PHY = 0x20;
+        const INT = 0x40;
     }
+
+    #[wasm_bindgen]
+    #[derive(Default)]
+    pub struct StatFlag : u32
+    {
+        const NONE = 0x0;
+        const ATK = 0x1;
+        const DEF = 0x2;
+        const HP = 0x4;
+        const KI = 0x8;
+    }
+
+}
+
+pub fn convert_str_to_type_flag(s : &str) -> TypeFlag 
+{
+    return match s {
+        "super str" => TypeFlag::SUPER|TypeFlag::STR,
+        "super agl" => TypeFlag::SUPER|TypeFlag::AGL,
+        "super teq" => TypeFlag::SUPER|TypeFlag::TEQ,
+        "super phy" => TypeFlag::SUPER|TypeFlag::PHY,
+        "super int" => TypeFlag::SUPER|TypeFlag::INT,
+        "extreme str" => TypeFlag::EXTREME|TypeFlag::STR,
+        "extreme agl" => TypeFlag::EXTREME|TypeFlag::AGL,
+        "extreme teq" => TypeFlag::EXTREME|TypeFlag::TEQ,
+        "extreme phy" => TypeFlag::EXTREME|TypeFlag::PHY,
+        "extreme int" => TypeFlag::EXTREME|TypeFlag::INT,
+        "str" => TypeFlag::STR,
+        "agl" => TypeFlag::AGL,
+        "teq" => TypeFlag::TEQ,
+        "phy" => TypeFlag::PHY,
+        "int" => TypeFlag::INT,
+        _ => TypeFlag::NONE
+    };
+}
+
+pub fn convert_str_to_stat_flag(s : &str) -> StatFlag
+{
+    return match s {
+        "atk" => StatFlag::ATK,
+        "def" => StatFlag::DEF,
+        "hp" => StatFlag::HP,
+        "ki" => StatFlag::KI,
+        _ => StatFlag::NONE
+    };
 }
 
 
