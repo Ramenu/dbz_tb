@@ -8,8 +8,8 @@ use crate::{flags, tokenizer};
 #[wasm_bindgen]
 pub struct LeaderSkillInfo
 {
-    types_boosted : flags::TypeFlag,
-    stats_boosted : flags::StatFlag
+    pub types_boosted : flags::TypeFlag,
+    pub stats_boosted : flags::StatFlag
 }
 
 enum Call
@@ -20,19 +20,21 @@ enum Call
 pub fn parse_leader_skill_stat_boosts(leader_skill : &mut String, info : &mut LeaderSkillInfo, advance : bool) -> Option<()>
 {
     lazy_static::lazy_static! {
-        static ref TYPE_LEADER_SKILL_BOOST_RE : Regex = Regex::new(r"(agl|int|phy|str|teq)?,? ?(agl|int|phy|str|teq)? ?(?:&|and)? ?(agl|int|phy|str|teq) type (atk|def|hp|ki) \+ ?[0-9]+%?").expect("Failed to compile regex");
+        static ref TYPE_LEADER_SKILL_BOOST_RE : Regex = Regex::new(r"^(agl|int|phy|str|teq)?,? ?(agl|int|phy|str|teq)?,? ?(?:&|and)? ?(agl|int|phy|str|teq) type (atk|def|hp|ki) \+ ?[0-9]+%?").expect("Failed to compile regex");
     }
     let captures = TYPE_LEADER_SKILL_BOOST_RE.captures(&leader_skill)?;
-    for i in 0..captures.len() {
-        let type_flag = flags::convert_str_to_type_flag(&captures[i]);
-        info.types_boosted |= type_flag;
-        if type_flag == flags::TypeFlag::NONE {
-            info.stats_boosted |= flags::convert_str_to_stat_flag(&captures[i]);
+    for capture in captures.iter(){
+        if capture.is_some() {
+            let capture_str = capture.expect("Failed to retrieve capture group").as_str();
+            let type_flag = flags::convert_str_to_type_flag(capture_str);
+            info.types_boosted |= type_flag;
+            if type_flag == flags::TypeFlag::NONE {
+                info.stats_boosted |= flags::convert_str_to_stat_flag(capture_str);
+            }
         }
     }
-
     if advance {
-        tokenizer::advance_until(&leader_skill, &TYPE_LEADER_SKILL_BOOST_RE);
+        *leader_skill = tokenizer::advance_until(&leader_skill, &TYPE_LEADER_SKILL_BOOST_RE);
     }
     return Some(());
 }
