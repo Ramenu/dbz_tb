@@ -41,7 +41,7 @@ impl SaInfo
     #[wasm_bindgen(constructor)]
     pub fn new() -> SaInfo {
         return SaInfo { modifier: Modifier::Low, 
-                        effect: EffectFlag::EFFECT_NULL, 
+                        effect: EffectFlag::NONE, 
                         atk_buff: 0.0, def_buff: 0.0, 
                         atkdef_buff_turn_count: 0, 
                         turns_to_stun: 0, 
@@ -194,22 +194,22 @@ fn get_sa_stat_change_eff(eff : effectparser::StatEffect, sa : &mut SaInfo)
 {
     let mut additional_boost = 0.0;
     let mut boost = 0.0;
-    if eff.get_stat_effect()&EffectFlag::EFFECT_GREATLY != EffectFlag::EFFECT_NULL {
+    if eff.get_stat_effect()&EffectFlag::GREATLY != EffectFlag::NONE {
         additional_boost = flags::GREATLY_INC_OR_DEC_MODIFIER_PERCENTAGE - flags::INC_OR_DEC_MODIFIER_PERCENTAGE;
     }
-    if eff.get_stat_effect()&EffectFlag::EFFECT_RAISES != EffectFlag::EFFECT_NULL {
+    if eff.get_stat_effect()&EffectFlag::RAISES != EffectFlag::NONE {
         boost += flags::INC_OR_DEC_MODIFIER_PERCENTAGE + additional_boost;
     }
-    if eff.get_stat_effect()&EffectFlag::EFFECT_LOWERS != EffectFlag::EFFECT_NULL {
+    if eff.get_stat_effect()&EffectFlag::LOWERS != EffectFlag::NONE {
         boost -= flags::INC_OR_DEC_MODIFIER_PERCENTAGE + additional_boost;
     }
-    if eff.get_stat_effect()&EffectFlag::EFFECT_ATK_ALL_ENEMIES != EffectFlag::EFFECT_NULL {
-        sa.effect |= EffectFlag::EFFECT_ATK_ALL_ENEMIES;
+    if eff.get_stat_effect()&EffectFlag::ATK_ALL_ENEMIES != EffectFlag::NONE {
+        sa.effect |= EffectFlag::ATK_ALL_ENEMIES;
     }
-    if eff.get_stat_effect()&EffectFlag::EFFECT_ATK != EffectFlag::EFFECT_NULL {
+    if eff.get_stat_effect()&EffectFlag::ATK != EffectFlag::NONE {
         sa.atk_buff += boost;
     }
-    if eff.get_stat_effect()&EffectFlag::EFFECT_DEF != EffectFlag::EFFECT_NULL {
+    if eff.get_stat_effect()&EffectFlag::DEF != EffectFlag::NONE {
         sa.def_buff += boost;
     }
 
