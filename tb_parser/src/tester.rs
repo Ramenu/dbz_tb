@@ -3,7 +3,7 @@ use crate::effectparser::*;
 use crate::flags::*;
 
 #[cfg(debug_assertions)]
- const CHANCE_COMBINATIONS : [(&str, u32); 8] = [
+const CHANCE_COMBINATIONS : [(&str, u32); 8] = [
     ("ultra-rare chance", ULTRA_RARE_CHANCE_PERCENTAGE),
     ("rare chance", RARE_CHANCE_PERCENTAGE),
     ("may", MAY_CHANCE_PERCENTAGE),
@@ -12,6 +12,115 @@ use crate::flags::*;
     ("medium chance", MEDIUM_CHANCE_PERCENTAGE),
     ("high chance", HIGH_CHANCE_PERCENTAGE),
     ("great chance", GREAT_CHANCE_PERCENTAGE)
+];
+
+#[cfg(debug_assertions)]
+const TYPES : [&str; 105] = [
+    "phy",
+    "phy and teq",
+    "phy, teq, and phy",
+    "phy, teq, and str",
+    "phy, teq, and int",
+    "phy, teq, and agl",
+    "phy and str",
+    "phy, str, and phy",
+    "phy, str, and teq",
+    "phy, str, and int",
+    "phy, str, and agl",
+    "phy and int",
+    "phy, int, and phy",
+    "phy, int, and teq",
+    "phy, int, and str",
+    "phy, int, and agl",
+    "phy and agl",
+    "phy, agl, and phy",
+    "phy, agl, and teq",
+    "phy, agl, and str",
+    "phy, agl, and int",
+    "teq",
+    "teq and phy",
+    "teq, phy, and teq",
+    "teq, phy, and str",
+    "teq, phy, and int",
+    "teq, phy, and agl",
+    "teq and str",
+    "teq, str, and phy",
+    "teq, str, and teq",
+    "teq, str, and int",
+    "teq, str, and agl",
+    "teq and int",
+    "teq, int, and phy",
+    "teq, int, and teq",
+    "teq, int, and str",
+    "teq, int, and agl",
+    "teq and agl",
+    "teq, agl, and phy",
+    "teq, agl, and teq",
+    "teq, agl, and str",
+    "teq, agl, and int",
+    "str",
+    "str and phy",
+    "str, phy, and teq",
+    "str, phy, and str",
+    "str, phy, and int",
+    "str, phy, and agl",
+    "str and teq",
+    "str, teq, and phy",
+    "str, teq, and str",
+    "str, teq, and int",
+    "str, teq, and agl",
+    "str and int",
+    "str, int, and phy",
+    "str, int, and teq",
+    "str, int, and str",
+    "str, int, and agl",
+    "str and agl",
+    "str, agl, and phy",
+    "str, agl, and teq",
+    "str, agl, and str",
+    "str, agl, and int",
+    "int",
+    "int and phy",
+    "int, phy, and teq",
+    "int, phy, and str",
+    "int, phy, and int",
+    "int, phy, and agl",
+    "int and teq",
+    "int, teq, and phy",
+    "int, teq, and str",
+    "int, teq, and int",
+    "int, teq, and agl",
+    "int and str",
+    "int, str, and phy",
+    "int, str, and teq",
+    "int, str, and int",
+    "int, str, and agl",
+    "int and agl",
+    "int, agl, and phy",
+    "int, agl, and teq",
+    "int, agl, and str",
+    "int, agl, and int",
+    "agl",
+    "agl and phy",
+    "agl, phy, and teq",
+    "agl, phy, and str",
+    "agl, phy, and int",
+    "agl, phy, and agl",
+    "agl and teq",
+    "agl, teq, and phy",
+    "agl, teq, and str",
+    "agl, teq, and int",
+    "agl, teq, and agl",
+    "agl and str",
+    "agl, str, and phy",
+    "agl, str, and teq",
+    "agl, str, and int",
+    "agl, str, and agl",
+    "agl and int",
+    "agl, int, and phy",
+    "agl, int, and teq",
+    "agl, int, and str",
+    "agl, int, and agl"
 ];
 
 #[cfg(debug_assertions)]
@@ -206,13 +315,13 @@ pub fn test_get_stun_effect()
 {
 
     let end_combinations : [(&str, EffectFlag); 7] = [
-        ("to stun the enemy", EffectFlag::EFFECT_NULL),
-        ("to stun all enemies", EffectFlag::EFFECT_STUN|EffectFlag::EFFECT_STAT_TARGET_ALL),
-        ("stun the enemy", EffectFlag::EFFECT_NULL),
-        ("stun all enemies", EffectFlag::EFFECT_STUN|EffectFlag::EFFECT_STAT_TARGET_ALL),
-        ("of stunning the attacked enemy", EffectFlag::EFFECT_NULL),
-        ("to stun the attacked enemy", EffectFlag::EFFECT_NULL),
-        ("stun the attacked enemy within the same turn", EffectFlag::EFFECT_NULL)
+        ("to stun the enemy", EffectFlag::NONE),
+        ("to stun all enemies", EffectFlag::STUN|EffectFlag::STAT_TARGET_ALL),
+        ("stun the enemy", EffectFlag::NONE),
+        ("stun all enemies", EffectFlag::STUN|EffectFlag::STAT_TARGET_ALL),
+        ("of stunning the attacked enemy", EffectFlag::NONE),
+        ("to stun the attacked enemy", EffectFlag::NONE),
+        ("stun the attacked enemy within the same turn", EffectFlag::NONE)
     ];
 
     for chance in CHANCE_COMBINATIONS
@@ -239,16 +348,16 @@ pub fn test_get_stun_effect()
 pub fn test_get_seal_effect()
 {
     let effects : [(&str, EffectChance); 10] = [
-        ("rare chance to seal all enemies' super attack", EffectChance{eff_chance: RARE_CHANCE_PERCENTAGE, eff_turn_count: 1, eff: EffectFlag::EFFECT_SEAL|EffectFlag::EFFECT_STAT_TARGET_ALL}),
-        ("may seal enemy's super attack", EffectChance{eff_chance: MAY_CHANCE_PERCENTAGE, eff_turn_count: 1, eff: EffectFlag::EFFECT_NULL}),
-        ("seals super attack", EffectChance{eff_chance: 100, eff_turn_count: 1, eff: EffectFlag::EFFECT_NULL}),
-        ("medium chance to seal super attack", EffectChance{eff_chance: MEDIUM_CHANCE_PERCENTAGE, eff_turn_count: 1, eff: EffectFlag::EFFECT_NULL}),
-        ("high chance to seal the attacked enemy's super attack", EffectChance{eff_chance: HIGH_CHANCE_PERCENTAGE, eff_turn_count: 1, eff: EffectFlag::EFFECT_NULL}),
-        ("high chance of sealing super attack", EffectChance{eff_chance: HIGH_CHANCE_PERCENTAGE, eff_turn_count: 1, eff: EffectFlag::EFFECT_NULL}),
-        ("medium chance of sealing super attack", EffectChance{eff_chance: MEDIUM_CHANCE_PERCENTAGE, eff_turn_count: 1, eff: EffectFlag::EFFECT_NULL}),
-        ("seals that enemy's super attack", EffectChance{eff_chance: 100, eff_turn_count: 1, eff: EffectFlag::EFFECT_NULL}),
-        ("high chance of sealing super attack for 3 turns", EffectChance{eff_chance: HIGH_CHANCE_PERCENTAGE, eff_turn_count: 3, eff: EffectFlag::EFFECT_NULL}),
-        ("empty string", EffectChance{eff_chance: 0, eff_turn_count: 0, eff: EffectFlag::EFFECT_NULL})
+        ("rare chance to seal all enemies' super attack", EffectChance{eff_chance: RARE_CHANCE_PERCENTAGE, eff_turn_count: 1, eff: EffectFlag::SEAL|EffectFlag::STAT_TARGET_ALL}),
+        ("may seal enemy's super attack", EffectChance{eff_chance: MAY_CHANCE_PERCENTAGE, eff_turn_count: 1, eff: EffectFlag::NONE}),
+        ("seals super attack", EffectChance{eff_chance: 100, eff_turn_count: 1, eff: EffectFlag::NONE}),
+        ("medium chance to seal super attack", EffectChance{eff_chance: MEDIUM_CHANCE_PERCENTAGE, eff_turn_count: 1, eff: EffectFlag::NONE}),
+        ("high chance to seal the attacked enemy's super attack", EffectChance{eff_chance: HIGH_CHANCE_PERCENTAGE, eff_turn_count: 1, eff: EffectFlag::NONE}),
+        ("high chance of sealing super attack", EffectChance{eff_chance: HIGH_CHANCE_PERCENTAGE, eff_turn_count: 1, eff: EffectFlag::NONE}),
+        ("medium chance of sealing super attack", EffectChance{eff_chance: MEDIUM_CHANCE_PERCENTAGE, eff_turn_count: 1, eff: EffectFlag::NONE}),
+        ("seals that enemy's super attack", EffectChance{eff_chance: 100, eff_turn_count: 1, eff: EffectFlag::NONE}),
+        ("high chance of sealing super attack for 3 turns", EffectChance{eff_chance: HIGH_CHANCE_PERCENTAGE, eff_turn_count: 3, eff: EffectFlag::NONE}),
+        ("empty string", EffectChance{eff_chance: 0, eff_turn_count: 0, eff: EffectFlag::NONE})
     ];
 
     for eff in effects
@@ -261,4 +370,9 @@ pub fn test_get_seal_effect()
     }
 
     pass("test_get_seal_effect()");
+}
+
+#[cfg(debug_assertions)]
+pub fn test_leader_skill_parsing()
+{
 }
