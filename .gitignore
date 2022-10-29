@@ -11,6 +11,8 @@
 /tb_parser/wasm-pack.log
 /tb_parser/tests
 /tb_parser/.vscode
+/tb_parser/*.py
+/tb_parser/*.txt
 
 # testing
 /coverage
