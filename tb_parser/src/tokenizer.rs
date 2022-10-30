@@ -15,10 +15,12 @@ pub enum Token
     Null
 }
 
+#[derive(PartialEq, Copy, Clone)]
 pub enum TokenKeywordType
 {
     Stat,
     Type,
+    Conditional,
     Generic
 }
 
@@ -49,7 +51,7 @@ pub fn is_skippable_token(token : &(String, Token)) -> bool
         return false;
     }
     return match token.0.as_str() {
-        ";"|"and" => true,
+        ";"|"and"|"," => true,
         _ => false
     };
 }
@@ -76,8 +78,9 @@ pub fn is_number(s : &String) -> bool {
 pub fn get_token_keyword_category(s : &str) -> TokenKeywordType
 {
     return match s {
-        "atk"|"def"|"hp" => TokenKeywordType::Stat,
+        "atk"|"def"|"hp"|"ki" => TokenKeywordType::Stat,
         "str"|"phy"|"int"|"teq"|"agl" => TokenKeywordType::Type,
+        "if"|"when" => TokenKeywordType::Conditional,
         _ => TokenKeywordType::Generic
     };
 }
