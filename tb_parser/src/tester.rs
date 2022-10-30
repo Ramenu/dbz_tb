@@ -1,6 +1,8 @@
 use crate::{tokenizer, sa};
 use crate::effectparser::*;
 use crate::flags::*;
+use crate::leaderskill;
+use colored::Colorize;
 
 #[cfg(debug_assertions)]
 const CHANCE_COMBINATIONS : [(&str, u32); 8] = [
@@ -130,9 +132,9 @@ const N_TURNS : [(&str, u32); 3] = [
 ];
 
 #[cfg(debug_assertions)]
-fn pass(s : &str)
+fn pass(s : &str) 
 {
-    println!("{} - PASSED ✓", s);
+    println!("{} - {}", s, "PASSED ✓".green());
 }
 
 /// Prints the token type for 's'.
@@ -187,8 +189,7 @@ pub fn test_sa_retrieval()
     ];
 
     // Round 1
-    for s in super_atks 
-    {
+    for s in super_atks {
         let sa_match = sa::get_sa_match(s).expect("Failed to find match in super attack").as_str();
         let modifier = sa::get_sa_modifier(sa_match).expect("Failed to retrieve super attack modifier");
         println!("\nTest string is: {}\n-----------\nSuper attack is: {}\nModifier is: {}", s, sa_match, modifier);
@@ -196,10 +197,8 @@ pub fn test_sa_retrieval()
 
     let mut t = String::from(" to enemy");
     // Round 2
-    for _ in 0..2 
-    {
-        for s in super_atks 
-        {
+    for _ in 0..2 {
+        for s in super_atks {
             let s = String::from(s) + &t;
             let sa_match = sa::get_sa_match(&s).expect("Failed to find match in super attack").as_str();
             let modifier = sa::get_sa_modifier(sa_match).expect("Failed to retrieve super attack modifier");
@@ -228,8 +227,7 @@ pub fn test_raises_or_lowers_stat()
         "raises atk for 1 turn"
     ];
 
-    for s in status_effects
-    {
+    for s in status_effects {
         let mut tmp = s.to_string();
         let stat = raises_or_lowers_stat(&mut tmp, false).expect("Test failed. L");
 
@@ -246,8 +244,7 @@ pub fn test_raises_or_lowers_stat()
 #[cfg(debug_assertions)]
 pub fn test_super_attack_parsing(extensive_test : bool)
 {
-    if extensive_test
-    {
+    if extensive_test {
         test_sa_retrieval();
         test_raises_or_lowers_stat();
         test_get_stun_effect();
@@ -290,12 +287,9 @@ pub fn test_super_attack_parsing(extensive_test : bool)
         (" and greatly raises def", StatChange{atk_buff: 0.0, def_buff: GREATLY_INC_OR_DEC_MODIFIER_PERCENTAGE})
     ];
 
-    for start in START_WORDS 
-    {
-        for modifier in SA_MODIFIERS
-        {
-            for end in END_WORDS
-            {
+    for start in START_WORDS {
+        for modifier in SA_MODIFIERS {
+            for end in END_WORDS {
                 let s = start.to_string() + modifier.0 + end.0;
                 let sa = sa::parse_super_attack(&s);
 
@@ -323,12 +317,9 @@ pub fn test_get_stun_effect()
         ("stun the attacked enemy within the same turn", EffectFlag::NONE)
     ];
 
-    for chance in CHANCE_COMBINATIONS
-    {
-        for end in end_combinations
-        {
-            for turn_count in N_TURNS
-            {
+    for chance in CHANCE_COMBINATIONS {
+        for end in end_combinations {
+            for turn_count in N_TURNS {
                 let mut s = chance.0.to_string() + " " + &end.0.to_string() + &turn_count.0.to_string();
                 let eff = get_stun_effect(&mut s, false);
 
@@ -359,8 +350,7 @@ pub fn test_get_seal_effect()
         ("empty string", EffectChance{eff_chance: 0, eff_turn_count: 0, eff: EffectFlag::NONE})
     ];
 
-    for eff in effects
-    {
+    for eff in effects {
         let mut s = eff.0.to_string();
         let test_eff = get_seal_effect(&mut s, false);
         assert_eq!(eff.1.eff_chance, test_eff.eff_chance);
@@ -375,15 +365,22 @@ pub fn test_get_seal_effect()
 pub fn test_leader_skill_parsing()
 {
     // Round 1
-    use crate::leaderskill::parse_leader_skill;
-    for types_boosted in TYPES.iter() {
-        for stats_boosted in STATS.iter() {
-            for num in NUMS.iter() {
-                let leader_skill = types_boosted.0.to_string() + " type " + &stats_boosted.0.to_string() + " +" + &num.to_string();
-                let info = parse_leader_skill(&leader_skill);
-                assert_eq!(info.types_boosted, TypeFlag::from_bits(types_boosted.1).expect("Couldn't convert value to a flag"));
-                assert_eq!(info.stats_boosted, stats_boosted.1);
-            }
+
+    use crate::leaderskill::{TEQ_INDEX, STR_INDEX, AGL_INDEX, INT_INDEX, PHY_INDEX, EXTREME_TEQ_INDEX};
+
+    let leader_skills = [
+        ("teq type def +20%", StatFlag::DEF, 0.2, vec![TEQ_INDEX]),
+        ("str type atk +2500", StatFlag::ATK|StatFlag::FLAT_BOOST, 2500.0, vec![STR_INDEX]),
+        ("agl, int, and phy type atk +30%", StatFlag::ATK, 0.3, vec![AGL_INDEX, INT_INDEX, PHY_INDEX]),
+        ("teq and str type ki +2", StatFlag::KI|StatFlag::FLAT_BOOST, 2.0, vec![TEQ_INDEX, STR_INDEX])
+    ];
+
+    for ls in leader_skills {
+        let info = leaderskill::parse_leader_skill(ls.0.to_string());
+
+        for i in 0..ls.3.len() {
+            assert_eq!(info.get_types()[ls.3[i]].stats_boosted, ls.1);
+            assert_eq!(info.get_types()[ls.3[i]].boost_amount, ls.2);
         }
     }
 
