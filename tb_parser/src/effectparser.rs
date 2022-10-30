@@ -175,8 +175,7 @@ pub fn raises_or_lowers_stat(s : &mut String, advance : bool) -> Option<StatEffe
     let re_match = RE.find(&s)?.as_str();
     let stat_eff = get_stat_effect(re_match).expect("Unable to retrieve any stat effect");
 
-    if advance 
-    {
+    if advance {
         *s = RE.replace(s, "").to_string();
         return Some(StatEffect{stat_eff: stat_eff, stat_eff_turn_count: get_eff_turn_count(s, true)});
     }
@@ -190,8 +189,7 @@ pub fn raises_or_lowers_stat(s : &mut String, advance : bool) -> Option<StatEffe
 /// chance system (it's way too mixed up).
 pub fn get_chance_percentage(s : &str) -> u32
 {
-    return match s
-    {
+    return match s {
         "ultra-rare chance" => ULTRA_RARE_CHANCE_PERCENTAGE, // devilman sa
         "rare chance" => RARE_CHANCE_PERCENTAGE,
         "may" => MAY_CHANCE_PERCENTAGE,
@@ -223,8 +221,7 @@ pub fn get_stun_effect(s : &mut String, advance : bool) -> EffectChance
 
     let capture = RE.captures(s);
 
-    if capture.is_some()
-    {
+    if capture.is_some() {
         let mut num_turns;
         let capture_match = capture.expect("Failed to find match");
         let chance = capture_match.get(1).expect("Failed to retrieve first capture group").as_str();
@@ -271,8 +268,7 @@ pub fn get_seal_effect(s : &mut String, advance : bool) -> EffectChance
 
     let capture = RE.captures(s);
 
-    if capture.is_some()
-    {
+    if capture.is_some() {
         let mut num_turns;
         let mut seal_chance : u32 = 100; // Seal chance is guaranteed to be 100% if no match is found
         let mut targets_all : EffectFlag = EffectFlag::NONE; // Guaranteed to hit one enemy only if no match is found

@@ -31,8 +31,7 @@ lazy_static! {
 impl fmt::Display for Token 
 {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        let s = match self 
-        {
+        let s = match self {
             Token::Op => "Binary Operator",
             Token::Keyword => "Keyword",
             Token::Number => "Number",
@@ -76,8 +75,7 @@ pub fn is_number(s : &String) -> bool {
 /// 's' is a keyword token.
 pub fn get_token_keyword_category(s : &str) -> TokenKeywordType
 {
-    return match s 
-    {
+    return match s {
         "atk"|"def"|"hp" => TokenKeywordType::Stat,
         "str"|"phy"|"int"|"teq"|"agl" => TokenKeywordType::Type,
         _ => TokenKeywordType::Generic
@@ -97,8 +95,7 @@ pub fn skip_token(s : &mut String) {
 /// string argument.
 pub fn get_token(s : &String) -> Token 
 {
-    let token: Token = match s.as_str()
-    {
+    let token: Token = match s.as_str() {
         "raises" | "atk" | "def" | "hp" | "category" |
         "type" | "and" | "or" | "str" | "agl" | "teq" |
         "phy" | "int" | "ki" | "start" | "end" | "of" |
@@ -187,10 +184,8 @@ fn trim_leading_whitespace(s : &mut String)
 /// then None will be returned.
 pub fn get_next_token(s : &mut String, advance : bool) -> Option<(String, Token)>
 {
-    if has_more_tokens(&s)
-    {
-        if RE.is_match(s) 
-        {
+    if has_more_tokens(&s) {
+        if RE.is_match(s) {
             let found = RE.find(&s).expect("Unable to find match in string").as_str().to_string();
             let token = get_token(&found);
             if advance {

@@ -106,8 +106,7 @@ pub enum Modifier
 impl fmt::Display for Modifier
 {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        let s = match self 
-        {
+        let s = match self {
             Modifier::Low => "low",
             Modifier::Damage => "damage",
             Modifier::HugeDestructive => "huge/destructive",
@@ -140,8 +139,7 @@ pub fn get_sa_modifier(s : &str) -> Option<Modifier>
                                .get(1)
                                .expect("Failed to retrieve capture group 1")
                                .as_str();
-    return match modifier
-    {
+    return match modifier {
         "low damage" => Some(Modifier::Low),
         "damage" => Some(Modifier::Damage),
         "huge damage" => Some(Modifier::HugeDestructive), // destructive damage isnt found in any of the units
@@ -166,8 +164,7 @@ pub fn get_sa_modifier_atk(modifier : Modifier) -> f32
     const SA_MODIFIER_COLOSSAL : f32 = 3.0;
     const SA_MODIFIER_MEGACOLOSSAL : f32 = 3.5;
 
-    return match modifier
-    {
+    return match modifier {
         Modifier::Low => (SA_MODIFIER_LOW),
         Modifier::Damage => (SA_MODIFIER_DAMAGE),
         Modifier::HugeDestructive => (SA_MODIFIER_HUGE_DESTRUCTIVE),
@@ -227,16 +224,13 @@ pub fn parse_super_attack(sa_eff : &str) -> SaInfo
     // Remove the sa modifier
     let mut s = SA_RE.replace(sa_eff, "").to_string();
 
-    while tokenizer::has_more_tokens(&s)
-    {
+    while tokenizer::has_more_tokens(&s) {
         let token = tokenizer::get_next_token(&mut s, false).expect("Could not retrieve next token");
-        if tokenizer::is_skippable_token(&token) 
-        {
+        if tokenizer::is_skippable_token(&token) {
             tokenizer::skip_token(&mut s);
             continue;
         }
-        if token.1 == tokenizer::Token::Keyword 
-        {
+        if token.1 == tokenizer::Token::Keyword {
             // Check if it raises or lowers atk/def of enemy or self
             let eff_opt = effectparser::raises_or_lowers_stat(&mut s, true);
             if eff_opt.is_some() {
