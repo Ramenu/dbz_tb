@@ -1,8 +1,10 @@
+use core::num;
 use std::default::Default;
 
 use crate::{tokenizer, sa::{self, SaInfo}, flags::{self, EffectFlag}};
 use lazy_static::lazy_static;
 use regex::Regex;
+use wasm_bindgen::prelude::wasm_bindgen;
 
 pub const ULTRA_RARE_CHANCE_PERCENTAGE : u32 = 1;
 pub const RARE_CHANCE_PERCENTAGE : u32 = 15;
@@ -19,6 +21,12 @@ pub struct StatEffect
     stat_eff_turn_count : u32,
 }
 
+#[wasm_bindgen]
+pub struct EffectCondition
+{
+    pub condition : flags::ConditionFlag,
+    pub condition_num : f32
+}
 
 pub struct EffectChance
 {
@@ -307,4 +315,60 @@ pub fn get_seal_effect(s : &mut String, advance : bool) -> EffectChance
     }
 
     return EffectChance { eff_chance: 0, eff_turn_count: 0, eff: EffectFlag::NONE };
+}
+
+/// Parses conditional statements.
+fn parse_condition(s : &mut String, advance : bool) -> Option<EffectCondition>
+{
+    let num_of_tokens = tokenizer::get_number_of_tokens(&s);
+    for _ in 0..num_of_tokens {
+        let token = tokenizer::get_next_token(s, true)?;
+        
+        if token.1 == tokenizer::Token::Keyword {
+            
+        }
+    }
+
+    return None;
+}
+
+/// Parses any stat buffs/nerfs. This also parses the
+/// conditional statements for when the buffs or nerfs 
+/// may apply.
+fn parse_stats(s : &mut String, advance : bool) -> Option<()>
+{
+    let mut affected_stats = flags::StatFlag::NONE;
+    let num_of_tokens = tokenizer::get_number_of_tokens(&s);
+    for _ in 0..num_of_tokens {
+        let token = tokenizer::get_next_token(s, true)?;
+
+        if token.1 == tokenizer::Token::Keyword {
+            let token_keyword_category = tokenizer::get_token_keyword_category(&token.0);
+            if token_keyword_category == tokenizer::TokenKeywordType::Stat {
+                affected_stats |= flags::convert_str_to_stat_flag(&token.0);
+            }
+            else if token_keyword_category == tokenizer::TokenKeywordType::Conditional {
+                parse_condition(s, true); 
+            }
+        }
+        if tokenizer::is_skippable_token(&token) {
+            continue;
+        }
+    }
+
+    return None;
+}
+
+pub fn parse_effect(mut s : String)
+{
+    let num_of_tokens = tokenizer::get_number_of_tokens(&s);
+    for _ in 0..num_of_tokens {
+        let token = tokenizer::get_next_token(&mut s, false).expect("Failed to retrieve next token");
+        if token.1 == tokenizer::Token::Keyword {
+            let token_keyword_category = tokenizer::get_token_keyword_category(&token.0);
+            if token_keyword_category == tokenizer::TokenKeywordType::Stat {
+                parse_stats(&mut s, true);
+            }
+        }
+    }
 }
