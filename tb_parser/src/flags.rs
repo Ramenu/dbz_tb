@@ -26,7 +26,6 @@ bitflags!
     }
 
     #[wasm_bindgen]
-    #[derive(Default)]
     pub struct TypeFlag : u32
     {
         const NONE = 0x0;
@@ -48,10 +47,13 @@ bitflags!
         const DEF = 0x2;
         const HP = 0x4;
         const KI = 0x8;
+        const FLAT_BOOST = 0x10;
     }
 
 }
 
+/// Returns the typeflag representation of the string 
+/// 's'.
 pub fn convert_str_to_type_flag(s : &str) -> TypeFlag 
 {
     return match s {
@@ -60,11 +62,13 @@ pub fn convert_str_to_type_flag(s : &str) -> TypeFlag
         "super teq" => TypeFlag::SUPER|TypeFlag::TEQ,
         "super phy" => TypeFlag::SUPER|TypeFlag::PHY,
         "super int" => TypeFlag::SUPER|TypeFlag::INT,
+        "super" => TypeFlag::SUPER,
         "extreme str" => TypeFlag::EXTREME|TypeFlag::STR,
         "extreme agl" => TypeFlag::EXTREME|TypeFlag::AGL,
         "extreme teq" => TypeFlag::EXTREME|TypeFlag::TEQ,
         "extreme phy" => TypeFlag::EXTREME|TypeFlag::PHY,
         "extreme int" => TypeFlag::EXTREME|TypeFlag::INT,
+        "extreme" => TypeFlag::EXTREME,
         "str" => TypeFlag::STR,
         "agl" => TypeFlag::AGL,
         "teq" => TypeFlag::TEQ,
@@ -74,6 +78,8 @@ pub fn convert_str_to_type_flag(s : &str) -> TypeFlag
     };
 }
 
+/// Returns a stat flag representation of the string
+/// 's'.
 pub fn convert_str_to_stat_flag(s : &str) -> StatFlag
 {
     return match s {
