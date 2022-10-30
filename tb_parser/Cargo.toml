@@ -15,6 +15,7 @@ wasm-bindgen = "0.2.63"
 regex = "1"
 lazy_static = "^1"
 bitflags = "1.2.1"
+colored = "2.0.0" # Use for debug builds only
 
 # The `console_error_panic_hook` crate provides better debugging of panics by
 # logging them with `console.error`. This is great for development, but requires
