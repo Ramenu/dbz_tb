@@ -139,6 +139,7 @@ pub fn parse_leader_skill(mut leader_skill : String) -> LeaderSkillInfo
     // Since there are many different types of leader skills, its important to just create seperate functions for
     // each different type
     while tokenizer::has_more_tokens(&leader_skill) {
+        let leader_skill_before = leader_skill.to_owned();
         for call in callbacks.iter() {
             let result = match call {
                 Callback::ParseLeaderSkillStatBoosts => parse_leader_skill_stat_boosts(&mut leader_skill, &mut info.types, true)
@@ -146,6 +147,9 @@ pub fn parse_leader_skill(mut leader_skill : String) -> LeaderSkillInfo
             if result.is_none() {
                 break;
             }
+        }
+        if &leader_skill_before == &leader_skill {
+            break;
         }
     }
     return info;
