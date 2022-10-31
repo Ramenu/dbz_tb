@@ -2,15 +2,17 @@
 
 use regex::Regex;
 use lazy_static::lazy_static;
-use std::fmt;
+use std::{fmt, str::FromStr, mem};
 use wasm_bindgen::prelude::*;
+
+use crate::{traits, flags};
 
 #[derive(Copy, Clone, PartialEq)]
 pub enum Token 
 {
-    Op,
+    Op(TokenOpType),
     Identifier,
-    Keyword,
+    Keyword(TokenKeywordType),
     Number,
     Null
 }
@@ -18,36 +20,46 @@ pub enum Token
 #[derive(PartialEq, Copy, Clone)]
 pub enum TokenKeywordType
 {
+    Generic,
     Stat,
     Type,
-    Conditional,
-    Generic
+    Conditional
 }
 
-lazy_static! {
-    // Beware this regex is far from perfect at the moment
-    static ref RE : Regex = Regex::new(r"([^\s\W]*[^\W][-']?\w*|[^\w\s])").expect("Failed to compile regex"); 
+#[derive(PartialEq, Copy, Clone)]
+pub enum ConditionalTokenType
+{
+    Generic,
+    Comparator
 }
 
+#[derive(PartialEq, Copy, Clone)]
+pub enum TokenOpType
+{
+    Generic,
+    Modifier,
+    Percentage
+}
+
+/* 
 #[cfg(debug_assertions)]
 impl fmt::Display for Token 
 {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        let s = match self {
-            Token::Op => "Binary Operator",
-            Token::Keyword => "Keyword",
-            Token::Number => "Number",
+        let s = match mem::discriminant(&self) {
+            mem::discriminant(&Token::Op(TokenOpType::Generic)) => "Binary Operator",
             _ => "Identifier"
         };
         write!(f, "{}", s)
     }
-}
+}*/
 
 /// Returns true if the token can be skipped (i.e., is of
 /// little importance to the semantics of the sentence).
 pub fn is_skippable_token(token : &(String, Token)) -> bool
 {
-    if token.1 != Token::Keyword && token.1 != Token::Op {
+    if mem::discriminant(&token.1) != mem::discriminant(&Token::Keyword(TokenKeywordType::Generic)) && 
+       mem::discriminant(&token.1) != mem::discriminant(&Token::Op(TokenOpType::Generic)) {
         return false;
     }
     return match token.0.as_str() {
@@ -69,19 +81,41 @@ pub fn advance_until(s : &String, r : &Regex) -> String
 /// Note that this does not count decimal
 /// numbers.
 #[inline]
-pub fn is_number(s : &String) -> bool {
+pub fn is_number(s : &str) -> bool {
     return s.parse::<i32>().is_ok();
+}
+
+#[inline]
+pub fn get_token_as_num<T : FromStr>(s : &str) -> Result<T, T::Err> {
+    return s.parse::<T>();
+}
+
+pub fn get_conditional_token_type(s : &str) -> Option<ConditionalTokenType>
+{
+    return match s {
+        "is"|"equal"|"to"|"="|"less"|"greater"|"more"|">"|"<" => Some(ConditionalTokenType::Comparator),
+        _ => None
+    };
 }
 
 /// Returns the category of the token. Requires that
 /// 's' is a keyword token.
-pub fn get_token_keyword_category(s : &str) -> TokenKeywordType
+fn get_token_keyword_category(s : &str) -> TokenKeywordType
 {
     return match s {
         "atk"|"def"|"hp"|"ki" => TokenKeywordType::Stat,
         "str"|"phy"|"int"|"teq"|"agl" => TokenKeywordType::Type,
-        "if"|"when" => TokenKeywordType::Conditional,
+        "if"|"when"|"is"|"or"|"and" => TokenKeywordType::Conditional,
         _ => TokenKeywordType::Generic
+    };
+}
+
+fn get_token_operator_category(s : &str) -> TokenOpType
+{
+    return match s {
+        "+"|"-" => TokenOpType::Modifier,
+        "%" => TokenOpType::Percentage,
+        _ => TokenOpType::Generic
     };
 }
 
@@ -92,6 +126,20 @@ pub fn skip_token(s : &mut String) {
     get_next_token(s, true);
 }
 
+/// Converts the token string to a condition flag. This can work with any
+/// type of token, but since it only examines one token, it cannot infer multiple
+/// conditions. So only the following conditions can be returned:
+/// * ConditionFlag::IF_EQUAL
+/// * ConditionFlag::IF_ABOVE
+/// * ConditionFlag::IF_BELOW
+pub fn convert_token_str_to_comparsion_flag(s : &str) -> Option<flags::ConditionFlag> {
+    return match s {
+        "is"|"equal"|"=" => Some(flags::ConditionFlag::IF_EQUAL),
+        "less"|"<" => Some(flags::ConditionFlag::IF_BELOW),
+        "greater"|"more"|">" => Some(flags::ConditionFlag::IF_ABOVE),
+        _ => None
+    };
+}
 
 
 /// Returns the type of the token given a 
@@ -138,10 +186,10 @@ pub fn get_token(s : &String) -> Token
         "other" | "than" | "excluded" | "included" | "certain" | "entrance" |
         "animation" | "guards" | "critical" | "not" | "single" | "targeted" |
         "their" | "every" | "perform" | "rest" | "it" | "ultra" | "belong" |
-        "etc" | "at" | "ultra-rare" | "deadly" => return Token::Keyword,
+        "etc" | "at" | "ultra-rare" | "deadly" => return Token::Keyword(get_token_keyword_category(&s)),
 
         // Note '/' can be used for OR options like 'Enemies/Allies' ATK +10%' 
-        "+" | "-" | "*" | "/" | ";" | "&" | ">" | "=" | "<" | "\"" | "%" | "," => return Token::Op,
+        "+" | "-" | "*" | "/" | ";" | "&" | ">" | "=" | "<" | "\"" | "%" | "," => return Token::Op(get_token_operator_category(&s)),
         _ => Token::Identifier
     };
     if s.parse::<i32>().is_ok() {
@@ -187,6 +235,10 @@ fn trim_leading_whitespace(s : &mut String)
 /// then None will be returned.
 pub fn get_next_token(s : &mut String, advance : bool) -> Option<(String, Token)>
 {
+    lazy_static! {
+        // Beware this regex is far from perfect at the moment
+        static ref RE : Regex = Regex::new(r"([^\s\W]*[^\W][-']?\w*|[^\w\s])").expect("Failed to compile regex"); 
+    }
     if has_more_tokens(&s) {
         if RE.is_match(s) {
             let found = RE.find(&s).expect("Unable to find match in string").as_str().to_string();
