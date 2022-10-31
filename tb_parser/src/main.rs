@@ -4,6 +4,8 @@ mod sa;
 mod tester;
 mod flags;
 mod leaderskill;
+mod traits;
+
 
 fn main() 
 {

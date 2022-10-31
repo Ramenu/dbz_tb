@@ -3,6 +3,7 @@ mod tokenizer;
 mod effectparser;
 mod sa;
 mod flags;
+mod traits;
 
 use wasm_bindgen::prelude::*;
 
