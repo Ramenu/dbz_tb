@@ -58,14 +58,29 @@ bitflags!
         const IF_ABOVE = 0x1;
         const IF_EQUAL = 0x2;
         const IF_BELOW = 0x4;
-        const ATK = 0x8;
-        const HP = 0x10;
-        const DEF = 0x20;
-        const KI = 0x40;
-        const TURNS = 0x80;
-        const PERCENTAGE = 0x100;
+        const TURNS = 0x8;
+        const PERCENTAGE = 0x10;
     }
 
+    #[wasm_bindgen]
+    #[derive(Default)]
+    pub struct OpFlag : u32
+    {
+        const NONE = 0x0;
+        const PLUS = 0x1;
+        const MINUS = 0x2;
+        const PERCENTAGE = 0x4;
+    }
+}
+
+pub fn convert_str_to_op_flag(s : &str) -> OpFlag
+{
+    return match s {
+        "+" => OpFlag::PLUS,
+        "-" => OpFlag::MINUS,
+        "%" => OpFlag::PERCENTAGE,
+        _ => OpFlag::NONE
+    };
 }
 
 /// Returns the typeflag representation of the string 
