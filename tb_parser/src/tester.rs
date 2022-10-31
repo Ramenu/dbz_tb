@@ -142,11 +142,11 @@ fn pass(s : &str)
 pub fn test_tokenizer(s : &String) {
     let result = tokenizer::get_token(s);
     match result {
-        tokenizer::Token::Op => println!("Token is a binary operator!"),
+        tokenizer::Token::Op(tokenizer::TokenOpType::Generic) => println!("Token is a binary operator!"),
         tokenizer::Token::Identifier => println!("Token is a identifier!"),
-        tokenizer::Token::Keyword => println!("Token is a keyword!"),
+        tokenizer::Token::Keyword(tokenizer::TokenKeywordType::Generic) => println!("Token is a keyword!"),
         tokenizer::Token::Number => println!("Token is a number!"),
-        tokenizer::Token::Null => println!("Token is null")
+        _ => println!("Token is null")
     };
 }
 
