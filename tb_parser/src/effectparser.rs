@@ -1,7 +1,7 @@
 use core::num;
-use std::default::Default;
+use std::{default::Default, error::Error, string::ParseError, mem};
 
-use crate::{tokenizer, sa::{self, SaInfo}, flags::{self, EffectFlag}};
+use crate::{tokenizer, sa::{self, SaInfo}, flags::{self, EffectFlag, OpFlag}};
 use lazy_static::lazy_static;
 use regex::Regex;
 use wasm_bindgen::prelude::wasm_bindgen;
@@ -22,6 +22,7 @@ pub struct StatEffect
 }
 
 #[wasm_bindgen]
+#[derive(Copy, Clone, Default)]
 pub struct EffectCondition
 {
     pub condition : flags::ConditionFlag,
@@ -33,6 +34,15 @@ pub struct EffectChance
     pub eff_chance : u32,
     pub eff_turn_count : u32,
     pub eff : EffectFlag
+}
+
+#[wasm_bindgen]
+#[derive(Default)]
+pub struct Effect
+{
+    pub stats : flags::StatFlag,
+    pub condition : EffectCondition,
+    pub modifier_num : u32
 }
 
 impl EffectChance
@@ -317,39 +327,57 @@ pub fn get_seal_effect(s : &mut String, advance : bool) -> EffectChance
     return EffectChance { eff_chance: 0, eff_turn_count: 0, eff: EffectFlag::NONE };
 }
 
+
 /// Parses conditional statements.
-fn parse_condition(s : &mut String, advance : bool) -> Option<EffectCondition>
+fn parse_condition(s : &mut String) -> EffectCondition
 {
+    let mut previous_token = String::new();
+    let mut effect_condition = EffectCondition::default();
+
+
     let num_of_tokens = tokenizer::get_number_of_tokens(&s);
     for _ in 0..num_of_tokens {
-        let token = tokenizer::get_next_token(s, true)?;
+        let token = tokenizer::get_next_token(s, true).expect("Failed to retrieve next token");
         
-        if token.1 == tokenizer::Token::Keyword {
+        if token.1 == tokenizer::Token::Keyword(tokenizer::TokenKeywordType::Conditional) {
+            let conditional_token_type = tokenizer::get_conditional_token_type(&token.0)
+                                                                          .expect("Failed to retrieve conditional token type");
             
+            if conditional_token_type == tokenizer::ConditionalTokenType::Comparator {                                                    
+                effect_condition.condition |= tokenizer::convert_token_str_to_comparsion_flag(&token.0)
+                                                        .expect("Failed to convert token to a comparsion flag");
+            }
         }
+        else if token.1 == tokenizer::Token::Number {
+            effect_condition.condition_num = tokenizer::get_token_as_num(&token.0).expect("Failed to convert token to number");
+        }
+        previous_token = token.0;
     }
 
-    return None;
+    return effect_condition;
 }
 
 /// Parses any stat buffs/nerfs. This also parses the
 /// conditional statements for when the buffs or nerfs 
 /// may apply.
-fn parse_stats(s : &mut String, advance : bool) -> Option<()>
+fn parse_stats(s : &mut String, effect : &mut Effect) -> Option<()>
 {
-    let mut affected_stats = flags::StatFlag::NONE;
+    let mut op_modifier : flags::OpFlag = flags::OpFlag::NONE;
     let num_of_tokens = tokenizer::get_number_of_tokens(&s);
     for _ in 0..num_of_tokens {
         let token = tokenizer::get_next_token(s, true)?;
 
-        if token.1 == tokenizer::Token::Keyword {
-            let token_keyword_category = tokenizer::get_token_keyword_category(&token.0);
-            if token_keyword_category == tokenizer::TokenKeywordType::Stat {
-                affected_stats |= flags::convert_str_to_stat_flag(&token.0);
-            }
-            else if token_keyword_category == tokenizer::TokenKeywordType::Conditional {
-                parse_condition(s, true); 
-            }
+        if token.1 == tokenizer::Token::Keyword(tokenizer::TokenKeywordType::Stat) {
+                effect.stats |= flags::convert_str_to_stat_flag(&token.0);
+        }
+        else if token.1 == tokenizer::Token::Keyword(tokenizer::TokenKeywordType::Conditional) {
+            parse_condition(s); 
+        }
+        else if mem::discriminant(&token.1) == mem::discriminant(&tokenizer::Token::Op(tokenizer::TokenOpType::Generic)) {
+            op_modifier |= flags::convert_str_to_op_flag(&token.0);
+        }
+        else if token.1 == tokenizer::Token::Number {
+            effect.modifier_num = tokenizer::get_token_as_num(s).expect("Failed to convert token to number");
         }
         if tokenizer::is_skippable_token(&token) {
             continue;
@@ -359,16 +387,15 @@ fn parse_stats(s : &mut String, advance : bool) -> Option<()>
     return None;
 }
 
-pub fn parse_effect(mut s : String)
+pub fn parse_effect(mut s : String) -> Effect
 {
+    let mut effect = Effect::default();
     let num_of_tokens = tokenizer::get_number_of_tokens(&s);
     for _ in 0..num_of_tokens {
         let token = tokenizer::get_next_token(&mut s, false).expect("Failed to retrieve next token");
-        if token.1 == tokenizer::Token::Keyword {
-            let token_keyword_category = tokenizer::get_token_keyword_category(&token.0);
-            if token_keyword_category == tokenizer::TokenKeywordType::Stat {
-                parse_stats(&mut s, true);
-            }
+        if token.1 == tokenizer::Token::Keyword(tokenizer::TokenKeywordType::Stat) {
+            parse_stats(&mut s, &mut effect).expect("This error should be impossible to see, should you encounter this please file a bug report");
         }
     }
+    return effect;
 }
