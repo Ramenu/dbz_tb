@@ -1,7 +1,7 @@
 use wasm_bindgen::prelude::*;
 use regex::Regex;
 use lazy_static::lazy_static;
-use std::{fmt};
+use std::{fmt, mem};
 use {crate::flags, crate::flags::EffectFlag, crate::effectparser};
 
 use crate::{tokenizer};
@@ -230,7 +230,7 @@ pub fn parse_super_attack(sa_eff : &str) -> SaInfo
             tokenizer::skip_token(&mut s);
             continue;
         }
-        if token.1 == tokenizer::Token::Keyword {
+        if mem::discriminant(&token.1) == mem::discriminant(&tokenizer::Token::Keyword(tokenizer::TokenKeywordType::Generic)) {
             // Check if it raises or lowers atk/def of enemy or self
             let eff_opt = effectparser::raises_or_lowers_stat(&mut s, true);
             if eff_opt.is_some() {
