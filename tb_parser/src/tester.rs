@@ -369,10 +369,32 @@ pub fn test_leader_skill_parsing()
     use crate::leaderskill::{TEQ_INDEX, STR_INDEX, AGL_INDEX, INT_INDEX, PHY_INDEX};
 
     let leader_skills = [
-        ("teq type def +20%", StatFlag::DEF, 0.2, vec![TEQ_INDEX], OpModifierFlag::PERCENTAGE|OpModifierFlag::PLUS),
-        ("str type atk +2500", StatFlag::ATK, 2500.0, vec![STR_INDEX], OpModifierFlag::PLUS),
-        ("agl, int, and phy type atk +30%", StatFlag::ATK, 0.3, vec![AGL_INDEX, INT_INDEX, PHY_INDEX], OpModifierFlag::PERCENTAGE|OpModifierFlag::PLUS),
-        ("teq and str type ki +2", StatFlag::KI, 2.0, vec![TEQ_INDEX, STR_INDEX], OpModifierFlag::PLUS)
+        ("teq type def +20%", StatFlag::DEF, 
+                              0.2, 
+                              vec![TEQ_INDEX], 
+                              OpModifierFlag::PERCENTAGE|OpModifierFlag::PLUS, 
+                              Effect{op_modifier_flag: OpModifierFlag::NONE, stats: StatFlag::NONE, condition: EffectCondition { flag_condition: ConditionFlag::NONE, condition_num: 0.0}, modifier_num: 0}),
+        ("str type atk +2500", StatFlag::ATK, 
+                               2500.0, 
+                               vec![STR_INDEX], 
+                               OpModifierFlag::PLUS,
+                               Effect{op_modifier_flag: OpModifierFlag::NONE, stats: StatFlag::NONE, condition: EffectCondition { flag_condition: ConditionFlag::NONE, condition_num: 0.0}, modifier_num: 0}),
+        ("agl, int, and phy type atk +30%", StatFlag::ATK, 
+                                            0.3, 
+                                            vec![AGL_INDEX, INT_INDEX, PHY_INDEX], 
+                                            OpModifierFlag::PERCENTAGE|OpModifierFlag::PLUS,
+                                            Effect{op_modifier_flag: OpModifierFlag::NONE, stats: StatFlag::NONE, condition: EffectCondition { flag_condition: ConditionFlag::NONE, condition_num: 0.0}, modifier_num: 0}),
+        ("teq and str type ki +2", StatFlag::KI, 
+                                   2.0, 
+                                   vec![TEQ_INDEX, STR_INDEX], 
+                                   OpModifierFlag::PLUS,
+                                   Effect{op_modifier_flag: OpModifierFlag::NONE, stats: StatFlag::NONE, condition: EffectCondition { flag_condition: ConditionFlag::NONE, condition_num: 0.0}, modifier_num: 0}),
+
+        ("ki +1 when hp is 50% or above", StatFlag::NONE,
+                                          0.0,
+                                          vec![],
+                                          OpModifierFlag::NONE,
+                                          Effect{op_modifier_flag: OpModifierFlag::PLUS, stats: StatFlag::KI, condition: EffectCondition { flag_condition: ConditionFlag::IF_EQUAL|ConditionFlag::IF_ABOVE|ConditionFlag::PERCENTAGE, condition_num: 50.0}, modifier_num: 1})
     ];
 
     for ls in leader_skills {
@@ -382,6 +404,7 @@ pub fn test_leader_skill_parsing()
             assert_eq!(info.get_types()[ls.3[i]].stats_boosted, ls.1);
             assert_eq!(info.get_types()[ls.3[i]].boost_amount, ls.2);
             assert_eq!(info.get_types()[ls.3[i]].op_modifier_flag, ls.4);
+            assert_eq!(info.get_effect_all(), &ls.5);
         }
     }
 
@@ -395,16 +418,12 @@ pub fn test_leader_skill_parsing()
 pub fn test_passive_skill_parsing()
 {
     let passive_skills = [
-        ("ki +1 when hp is 50% or above", Effect{op_modifier_flag: OpModifierFlag::PLUS, stats: StatFlag::KI, condition: EffectCondition { flag_condition: ConditionFlag::IF_EQUAL|ConditionFlag::IF_ABOVE|ConditionFlag::PERCENTAGE, condition_num: 50.0}, modifier_num: 1})
+        ("ki +2 when hp is 50% or above", Effect{op_modifier_flag: OpModifierFlag::PLUS, stats: StatFlag::KI, condition: EffectCondition { flag_condition: ConditionFlag::IF_EQUAL|ConditionFlag::IF_ABOVE|ConditionFlag::PERCENTAGE, condition_num: 50.0}, modifier_num: 2})
     ];
 
     for passive_skill in passive_skills {
         let eff = parse_effect(passive_skill.0.to_string());
-        assert_eq!(eff.modifier_num, passive_skill.1.modifier_num);
-        assert_eq!(eff.stats, passive_skill.1.stats);
-        assert_eq!(eff.condition.flag_condition, passive_skill.1.condition.flag_condition);
-        assert_eq!(eff.condition.condition_num, passive_skill.1.condition.condition_num);
-        assert_eq!(eff.op_modifier_flag, passive_skill.1.op_modifier_flag);
+        assert_eq!(eff, passive_skill.1);
     }
 
     pass("test_passive_skill_parsing()");

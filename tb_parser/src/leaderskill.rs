@@ -3,7 +3,7 @@ use std::cell::RefCell;
 use regex::Regex;
 use wasm_bindgen::prelude::*;
 
-use crate::{flags, tokenizer};
+use crate::{flags, tokenizer, effectparser};
 
 #[wasm_bindgen]
 #[derive(Copy, Clone, Default)]
@@ -36,7 +36,8 @@ pub const EXTREME_PHY_INDEX : usize = 16;
 #[derive(Default)]
 pub struct LeaderSkillInfo
 {
-    types : [TypeBoost; 17]
+    types : [TypeBoost; 17],
+    effect_all : effectparser::Effect // this effect applies to 'ALL' units
 }
 
 impl LeaderSkillInfo
@@ -44,11 +45,16 @@ impl LeaderSkillInfo
     pub fn get_types(&self) -> [TypeBoost; 17] {
         return self.types;
     }
+
+    pub fn get_effect_all(&self) -> &effectparser::Effect {
+        return &self.effect_all;
+    }
 }
 
 enum Callback
 {
-    ParseLeaderSkillStatBoosts
+    ParseLeaderSkillStatBoosts,
+    ParseEffect // Similar to passive skill parsing
 }
 
 /// Parses the leader skill, more specifically the types the leader skill boost applies to 
@@ -127,6 +133,11 @@ pub fn parse_leader_skill_stat_boosts(leader_skill : &mut String, info : &mut [T
     return Some(());
 }
 
+#[inline]
+fn parse_leader_skill_effect_all(leader_skill : &String, effect : &mut effectparser::Effect) -> Option<()> {
+    *effect = effectparser::parse_effect(leader_skill.to_owned());
+    return Some(());
+}
 
 /// Leader skill must be passed as lower cased.
 #[wasm_bindgen]
@@ -135,7 +146,8 @@ pub fn parse_leader_skill(mut leader_skill : String) -> LeaderSkillInfo
     let mut info = LeaderSkillInfo::default();
 
     let callbacks = [
-        Callback::ParseLeaderSkillStatBoosts
+        Callback::ParseLeaderSkillStatBoosts,
+        Callback::ParseEffect // should always be placed last in the array
     ];
 
     // Since there are many different types of leader skills, its important to just create seperate functions for
@@ -144,12 +156,14 @@ pub fn parse_leader_skill(mut leader_skill : String) -> LeaderSkillInfo
         let leader_skill_before = leader_skill.to_owned();
         for call in callbacks.iter() {
             let result = match call {
-                Callback::ParseLeaderSkillStatBoosts => parse_leader_skill_stat_boosts(&mut leader_skill, &mut info.types, true)
+                Callback::ParseLeaderSkillStatBoosts => parse_leader_skill_stat_boosts(&mut leader_skill, &mut info.types, true),
+                Callback::ParseEffect => parse_leader_skill_effect_all(&leader_skill, &mut info.effect_all)
             };
-            if result.is_none() {
+            if result.is_some() {
                 break;
             }
         }
+        // to prevent an infinite loop
         if &leader_skill_before == &leader_skill {
             break;
         }

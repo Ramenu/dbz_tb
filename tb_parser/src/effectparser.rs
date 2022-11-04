@@ -22,7 +22,7 @@ pub struct StatEffect
 }
 
 #[wasm_bindgen]
-#[derive(Copy, Clone, Default)]
+#[derive(Copy, Clone, Default, Debug, PartialEq)]
 pub struct EffectCondition
 {
     pub flag_condition : flags::ConditionFlag,
@@ -37,7 +37,7 @@ pub struct EffectChance
 }
 
 #[wasm_bindgen]
-#[derive(Default)]
+#[derive(Default, Debug, PartialEq)]
 pub struct Effect
 {
     pub op_modifier_flag : flags::OpModifierFlag,
