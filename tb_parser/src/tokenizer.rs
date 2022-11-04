@@ -103,12 +103,15 @@ pub fn get_token_as_num<T : FromStr>(s : &str) -> Result<T, T::Err> {
     return s.parse::<T>();
 }
 
-pub fn get_conditional_token_type(s : &str) -> Option<ConditionalTokenType>
+pub fn get_conditional_token_type(token : (&str, TokenKeywordType)) -> Option<ConditionalTokenType>
 {
-    return match s {
-        "is"|"equal"|"to"|"="|"less"|"greater"|"more"|">"|"<" => Some(ConditionalTokenType::Comparator),
-        _ => None
-    };
+    if token.1 != TokenKeywordType::Conditional {
+        return None;
+    }
+    return Some(match token.0 {
+        "is"|"equal"|"to"|"="|"less"|"greater"|"more"|">"|"<"|"above"|"below" => ConditionalTokenType::Comparator,
+        _ => ConditionalTokenType::Generic 
+    });
 }
 
 /// Returns the category of the token. Requires that
@@ -121,7 +124,7 @@ pub fn get_token_keyword_category(token : &(String, Token)) -> Option<TokenKeywo
     return Some(match token.0.as_str() {
         "atk"|"def"|"hp"|"ki" => TokenKeywordType::Stat,
         "str"|"phy"|"int"|"teq"|"agl" => TokenKeywordType::Type,
-        "if"|"when"|"is"|"or"|"and" => TokenKeywordType::Conditional,
+        "if"|"when"|"is"|"or"|"and"|"above"|"below" => TokenKeywordType::Conditional,
         _ => TokenKeywordType::Generic
     });
 }
@@ -154,8 +157,8 @@ pub fn skip_token(s : &mut String) {
 pub fn convert_token_str_to_comparsion_flag(s : &str) -> Option<flags::ConditionFlag> {
     return match s {
         "is"|"equal"|"=" => Some(flags::ConditionFlag::IF_EQUAL),
-        "less"|"<" => Some(flags::ConditionFlag::IF_BELOW),
-        "greater"|"more"|">" => Some(flags::ConditionFlag::IF_ABOVE),
+        "less"|"<"|"below" => Some(flags::ConditionFlag::IF_BELOW),
+        "greater"|"more"|">"|"above" => Some(flags::ConditionFlag::IF_ABOVE),
         _ => None
     };
 }
@@ -163,9 +166,9 @@ pub fn convert_token_str_to_comparsion_flag(s : &str) -> Option<flags::Condition
 
 /// Returns the type of the token given a 
 /// string argument.
-pub fn get_token(s : &String) -> Token 
+pub fn get_token_type(s : &str) -> Token 
 {
-    let token: Token = match s.as_str() {
+    let token: Token = match s {
         "raises" | "atk" | "def" | "hp" | "category" |
         "type" | "and" | "or" | "str" | "agl" | "teq" |
         "phy" | "int" | "ki" | "start" | "end" | "of" |
@@ -261,7 +264,7 @@ pub fn get_next_token(s : &mut String, advance : bool) -> Option<(String, Token)
     if has_more_tokens(&s) {
         if RE.is_match(s) {
             let found = RE.find(&s).expect("Unable to find match in string").as_str().to_string();
-            let token = get_token(&found);
+            let token = get_token_type(&found);
             if advance {
                 *s = RE.replace(s, "").to_string();
                 trim_leading_whitespace(s);
@@ -272,28 +275,17 @@ pub fn get_next_token(s : &mut String, advance : bool) -> Option<(String, Token)
     return None;
 }
 
-/// Returns an optional tuple consisting of a string and a vector of tokens.
-/// Retrieves 'n' tokens from the string 's', and also advances the string 'n'
-/// times if the advance flag is set to true. If n == 0 or the string does not
-/// contain 'n' or more tokens, then None will be returned and 's' will not be 
-/// modified at all.
-pub fn get_n_tokens(s : &mut String, n : u32, advance : bool) -> Option<(String, Vec<Token>)>
+/// Returns a vector of the next 'n' tokens from the string 's'.
+pub fn get_n_tokens(s : &mut String, n : u32, advance : bool) -> Vec<(String, Token)>
 {
-    if n == 0 {
-        return None;
-    }
-    let mut appended_tokens = String::new();
     let mut s_cpy = s.to_owned();
-    let mut tokens : Vec<Token> = Vec::new();
+    let mut tokens : Vec<(String, Token)> = Vec::new();
     for _ in 0..n {
-        let token = get_next_token(&mut s_cpy, true)?;
-        appended_tokens.push_str(" ");
-        appended_tokens += &token.0;
-        tokens.push(token.1);
+        let token = get_next_token(&mut s_cpy, true).expect("Failed to retrieve next token");
+        tokens.push(token);
     }
     if advance {
         *s = s_cpy;
     }
-    appended_tokens.remove(0); // Just a whitespace character so dont need to have it there
-    return Some((appended_tokens, tokens));
+    return tokens;
 }
