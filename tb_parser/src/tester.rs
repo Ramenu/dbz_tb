@@ -140,7 +140,7 @@ fn pass(s : &str)
 /// Prints the token type for 's'.
 #[cfg(debug_assertions)]
 pub fn test_tokenizer(s : &String) {
-    let result = tokenizer::get_token(s);
+    let result = tokenizer::get_token_type(s);
     match result {
         tokenizer::Token::Op => println!("Token is a binary operator!"),
         tokenizer::Token::Identifier => println!("Token is a identifier!"),
@@ -366,13 +366,13 @@ pub fn test_leader_skill_parsing()
 {
     // Round 1
 
-    use crate::leaderskill::{TEQ_INDEX, STR_INDEX, AGL_INDEX, INT_INDEX, PHY_INDEX, EXTREME_TEQ_INDEX};
+    use crate::leaderskill::{TEQ_INDEX, STR_INDEX, AGL_INDEX, INT_INDEX, PHY_INDEX};
 
     let leader_skills = [
-        ("teq type def +20%", StatFlag::DEF, 0.2, vec![TEQ_INDEX]),
-        ("str type atk +2500", StatFlag::ATK|StatFlag::FLAT_BOOST, 2500.0, vec![STR_INDEX]),
-        ("agl, int, and phy type atk +30%", StatFlag::ATK, 0.3, vec![AGL_INDEX, INT_INDEX, PHY_INDEX]),
-        ("teq and str type ki +2", StatFlag::KI|StatFlag::FLAT_BOOST, 2.0, vec![TEQ_INDEX, STR_INDEX])
+        ("teq type def +20%", StatFlag::DEF, 0.2, vec![TEQ_INDEX], OpModifierFlag::PERCENTAGE|OpModifierFlag::PLUS),
+        ("str type atk +2500", StatFlag::ATK, 2500.0, vec![STR_INDEX], OpModifierFlag::PLUS),
+        ("agl, int, and phy type atk +30%", StatFlag::ATK, 0.3, vec![AGL_INDEX, INT_INDEX, PHY_INDEX], OpModifierFlag::PERCENTAGE|OpModifierFlag::PLUS),
+        ("teq and str type ki +2", StatFlag::KI, 2.0, vec![TEQ_INDEX, STR_INDEX], OpModifierFlag::PLUS)
     ];
 
     for ls in leader_skills {
@@ -381,8 +381,31 @@ pub fn test_leader_skill_parsing()
         for i in 0..ls.3.len() {
             assert_eq!(info.get_types()[ls.3[i]].stats_boosted, ls.1);
             assert_eq!(info.get_types()[ls.3[i]].boost_amount, ls.2);
+            assert_eq!(info.get_types()[ls.3[i]].op_modifier_flag, ls.4);
         }
     }
 
     pass("test_leader_skill_parsing()");
+}
+
+/// This isn't exclusive to passive skills only.
+/// Leader skills, active skills, etc. can share
+/// similar abilities.
+#[cfg(debug_assertions)]
+pub fn test_passive_skill_parsing()
+{
+    let passive_skills = [
+        ("ki +1 when hp is 50% or above", Effect{op_modifier_flag: OpModifierFlag::PLUS, stats: StatFlag::KI, condition: EffectCondition { flag_condition: ConditionFlag::IF_EQUAL|ConditionFlag::IF_ABOVE|ConditionFlag::PERCENTAGE, condition_num: 50.0}, modifier_num: 1})
+    ];
+
+    for passive_skill in passive_skills {
+        let eff = parse_effect(passive_skill.0.to_string());
+        assert_eq!(eff.modifier_num, passive_skill.1.modifier_num);
+        assert_eq!(eff.stats, passive_skill.1.stats);
+        assert_eq!(eff.condition.flag_condition, passive_skill.1.condition.flag_condition);
+        assert_eq!(eff.condition.condition_num, passive_skill.1.condition.condition_num);
+        assert_eq!(eff.op_modifier_flag, passive_skill.1.op_modifier_flag);
+    }
+
+    pass("test_passive_skill_parsing()");
 }

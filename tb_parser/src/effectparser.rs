@@ -1,7 +1,7 @@
 use core::num;
 use std::{default::Default, error::Error, string::ParseError, mem};
 
-use crate::{tokenizer::{self, invalid_token}, sa::{self, SaInfo}, flags::{self, EffectFlag, OpFlag}};
+use crate::{tokenizer::{self, invalid_token}, sa::{self, SaInfo}, flags::{self, EffectFlag, OpModifierFlag}};
 use lazy_static::lazy_static;
 use regex::Regex;
 use wasm_bindgen::prelude::wasm_bindgen;
@@ -25,7 +25,7 @@ pub struct StatEffect
 #[derive(Copy, Clone, Default)]
 pub struct EffectCondition
 {
-    pub condition : flags::ConditionFlag,
+    pub flag_condition : flags::ConditionFlag,
     pub condition_num : f32
 }
 
@@ -40,6 +40,7 @@ pub struct EffectChance
 #[derive(Default)]
 pub struct Effect
 {
+    pub op_modifier_flag : flags::OpModifierFlag,
     pub stats : flags::StatFlag,
     pub condition : EffectCondition,
     pub modifier_num : u32
@@ -330,25 +331,33 @@ fn parse_condition(s : &mut String) -> EffectCondition
 {
     let mut effect_condition = EffectCondition::default();
 
-    let num_of_tokens = tokenizer::get_number_of_tokens(&s);
-    for _ in 0..num_of_tokens {
+    while tokenizer::has_more_tokens(s) {
         let token = tokenizer::get_next_token(s, true).expect("Failed to retrieve next token");
         
         if token.1 == tokenizer::Token::Keyword {
-            let token_keyword_category = tokenizer::get_token_keyword_category(&token).expect(invalid_token(token.1));
+            let token_keyword_category = tokenizer::get_token_keyword_category(&token)
+                                                                      .expect(invalid_token(token.1));
             if token_keyword_category == tokenizer::TokenKeywordType::Conditional {
-                let conditional_token_type = tokenizer::get_conditional_token_type(&token.0)
+                let conditional_token_type = tokenizer::get_conditional_token_type((&token.0, token_keyword_category))
                                                                               .expect("Failed to retrieve conditional token type");
                 
                 if conditional_token_type == tokenizer::ConditionalTokenType::Comparator {                                                    
-                    effect_condition.condition |= tokenizer::convert_token_str_to_comparsion_flag(&token.0)
+                    effect_condition.flag_condition |= tokenizer::convert_token_str_to_comparsion_flag(&token.0)
                                                              .expect("Failed to convert token to a comparsion flag");
                 }
+            }
+        }
+        else if token.1 == tokenizer::Token::Op {
+            let token_op_category = tokenizer::get_token_operator_category(&token)
+                                                                    .expect(invalid_token(token.1));
+
+            if token_op_category == tokenizer::TokenOpType::Percentage {
+                effect_condition.flag_condition |= flags::ConditionFlag::PERCENTAGE;
             }
 
         }
         else if token.1 == tokenizer::Token::Number {
-            effect_condition.condition_num = tokenizer::get_token_as_num(&token.0).expect("Failed to convert token to number");
+            effect_condition.condition_num = tokenizer::get_token_as_num::<f32>(&token.0).expect("Failed to convert token to number");
         }
     }
 
@@ -360,9 +369,7 @@ fn parse_condition(s : &mut String) -> EffectCondition
 /// may apply.
 fn parse_stats(s : &mut String, effect : &mut Effect) -> Option<()>
 {
-    let mut op_modifier : flags::OpFlag = flags::OpFlag::NONE;
-    let num_of_tokens = tokenizer::get_number_of_tokens(&s);
-    for _ in 0..num_of_tokens {
+    while tokenizer::has_more_tokens(s) {
         let token = tokenizer::get_next_token(s, true)?;
         
         if tokenizer::is_skippable_token(&token) {
@@ -375,28 +382,29 @@ fn parse_stats(s : &mut String, effect : &mut Effect) -> Option<()>
                 effect.stats |= flags::convert_str_to_stat_flag(&token.0);
             }
             else if token_keyword_category == tokenizer::TokenKeywordType::Conditional {
-                parse_condition(s);
+                let cond = parse_condition(s);
+                effect.condition.condition_num = cond.condition_num;
+                effect.condition.flag_condition |= cond.flag_condition;
             }
         }
         else if token.1 == tokenizer::Token::Op {
             let token_op_category = tokenizer::get_token_operator_category(&token).expect(invalid_token(token.1));
             if token_op_category == tokenizer::TokenOpType::Modifier || token_op_category == tokenizer::TokenOpType::Percentage {
-                op_modifier |= flags::convert_str_to_op_flag(&token.0);
+                effect.op_modifier_flag |= flags::convert_str_to_op_modifier_flag(&token.0);
             }
         }
         else if token.1 == tokenizer::Token::Number {
-            effect.modifier_num = tokenizer::get_token_as_num(s).expect("Failed to convert token to number");
+            effect.modifier_num = tokenizer::get_token_as_num(&token.0).expect("Failed to convert token to number");
         }
     }
 
-    return None;
+    return Some(());
 }
 
 pub fn parse_effect(mut s : String) -> Effect
 {
     let mut effect = Effect::default();
-    let num_of_tokens = tokenizer::get_number_of_tokens(&s);
-    for _ in 0..num_of_tokens {
+    while tokenizer::has_more_tokens(&s) {
         let token = tokenizer::get_next_token(&mut s, false).expect("Failed to retrieve next token");
         if token.1 == tokenizer::Token::Keyword {
             let token_keyword_category = tokenizer::get_token_keyword_category(&token).expect(invalid_token(token.1));
