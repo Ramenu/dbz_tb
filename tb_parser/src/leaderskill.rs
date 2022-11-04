@@ -10,6 +10,7 @@ use crate::{flags, tokenizer};
 pub struct TypeBoost
 {
     pub stats_boosted : flags::StatFlag,
+    pub op_modifier_flag : flags::OpModifierFlag,
     pub boost_amount : f32
 }
 
@@ -95,6 +96,7 @@ pub fn parse_leader_skill_stat_boosts(leader_skill : &mut String, info : &mut [T
             if stat != flags::StatFlag::NONE {
                 for i in 0..indexes.len() {
                     info[indexes[i]].stats_boosted |= stat;
+                    info[indexes[i]].op_modifier_flag |= flags::OpModifierFlag::PLUS; // no leader ive seen has '-' so far.... 
                 }
             }
         }
@@ -109,12 +111,12 @@ pub fn parse_leader_skill_stat_boosts(leader_skill : &mut String, info : &mut [T
         boost = replaced_text;
         let boost_num = boost.parse::<f32>().expect("Failed to convert string to f32");
         for i in 0..indexes.len() {
+            info[indexes[i]].op_modifier_flag |= flags::OpModifierFlag::PERCENTAGE;
             info[indexes[i]].boost_amount = boost_num / 100.0;
         }
     } else {
         let boost_num = boost.parse::<f32>().expect("Failed to convert string to f32");
         for i in 0..indexes.len() {
-            info[indexes[i]].stats_boosted |= flags::StatFlag::FLAT_BOOST;
             info[indexes[i]].boost_amount = boost_num;
         }
     }
