@@ -10,9 +10,9 @@ use crate::{traits, flags};
 #[derive(Copy, Clone, PartialEq)]
 pub enum Token 
 {
-    Op(TokenOpType),
+    Op,
     Identifier,
-    Keyword(TokenKeywordType),
+    Keyword,
     Number,
     Null
 }
@@ -54,12 +54,25 @@ impl fmt::Display for Token
     }
 }*/
 
+pub const fn invalid_token(token : Token) -> &'static str
+{
+    if token as u32 == Token::Op as u32 {
+        return "Token is not classified as an 'OPERATOR'";
+    } else if token as u32 == Token::Keyword as u32 {
+        return "Token is not classified as a 'KEYWORD'";
+    } else if token as u32 == Token::Identifier as u32 {
+        return "Token is not classified as a 'IDENTIFIER'";
+    } else if token as u32 == Token::Number as u32 {
+        return "Token is not classified as a 'NUMBER'";
+    }
+    return "Token is not classified as 'NULL'";
+}
+
 /// Returns true if the token can be skipped (i.e., is of
 /// little importance to the semantics of the sentence).
 pub fn is_skippable_token(token : &(String, Token)) -> bool
 {
-    if mem::discriminant(&token.1) != mem::discriminant(&Token::Keyword(TokenKeywordType::Generic)) && 
-       mem::discriminant(&token.1) != mem::discriminant(&Token::Op(TokenOpType::Generic)) {
+    if token.1 != Token::Keyword && token.1 != Token::Op {
         return false;
     }
     return match token.0.as_str() {
@@ -70,7 +83,7 @@ pub fn is_skippable_token(token : &(String, Token)) -> bool
 
 /// Uses the regex 'r' to replace the match with
 /// empty text. It also trims the leading whitespace.
-pub fn advance_until(s : &String, r : &Regex) -> String
+pub fn advance_until(s : &str, r : &Regex) -> String
 {
     let mut n = r.replace(s, "").to_string();
     trim_leading_whitespace(&mut n);
@@ -100,23 +113,29 @@ pub fn get_conditional_token_type(s : &str) -> Option<ConditionalTokenType>
 
 /// Returns the category of the token. Requires that
 /// 's' is a keyword token.
-fn get_token_keyword_category(s : &str) -> TokenKeywordType
+pub fn get_token_keyword_category(token : &(String, Token)) -> Option<TokenKeywordType>
 {
-    return match s {
+    if token.1 != Token::Keyword {
+        return None;
+    }
+    return Some(match token.0.as_str() {
         "atk"|"def"|"hp"|"ki" => TokenKeywordType::Stat,
         "str"|"phy"|"int"|"teq"|"agl" => TokenKeywordType::Type,
         "if"|"when"|"is"|"or"|"and" => TokenKeywordType::Conditional,
         _ => TokenKeywordType::Generic
-    };
+    });
 }
 
-fn get_token_operator_category(s : &str) -> TokenOpType
+pub fn get_token_operator_category(token : &(String, Token)) -> Option<TokenOpType>
 {
-    return match s {
+    if token.1 != Token::Op {
+        return None;
+    }
+    return Some(match token.0.as_str() {
         "+"|"-" => TokenOpType::Modifier,
         "%" => TokenOpType::Percentage,
         _ => TokenOpType::Generic
-    };
+    });
 }
 
 /// Simply advances 's' to get the next
@@ -186,10 +205,10 @@ pub fn get_token(s : &String) -> Token
         "other" | "than" | "excluded" | "included" | "certain" | "entrance" |
         "animation" | "guards" | "critical" | "not" | "single" | "targeted" |
         "their" | "every" | "perform" | "rest" | "it" | "ultra" | "belong" |
-        "etc" | "at" | "ultra-rare" | "deadly" => return Token::Keyword(get_token_keyword_category(&s)),
+        "etc" | "at" | "ultra-rare" | "deadly" => return Token::Keyword,
 
         // Note '/' can be used for OR options like 'Enemies/Allies' ATK +10%' 
-        "+" | "-" | "*" | "/" | ";" | "&" | ">" | "=" | "<" | "\"" | "%" | "," => return Token::Op(get_token_operator_category(&s)),
+        "+" | "-" | "*" | "/" | ";" | "&" | ">" | "=" | "<" | "\"" | "%" | "," => return Token::Op,
         _ => Token::Identifier
     };
     if s.parse::<i32>().is_ok() {

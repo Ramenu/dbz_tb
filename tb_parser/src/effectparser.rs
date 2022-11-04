@@ -1,7 +1,7 @@
 use core::num;
 use std::{default::Default, error::Error, string::ParseError, mem};
 
-use crate::{tokenizer, sa::{self, SaInfo}, flags::{self, EffectFlag, OpFlag}};
+use crate::{tokenizer::{self, invalid_token}, sa::{self, SaInfo}, flags::{self, EffectFlag, OpFlag}};
 use lazy_static::lazy_static;
 use regex::Regex;
 use wasm_bindgen::prelude::wasm_bindgen;
@@ -219,10 +219,8 @@ pub fn get_chance_percentage(s : &str) -> u32
     };
 }
 
-/// Returns 1 if the string matches
-/// 'all enemies' literally. This is not
-/// returned as a boolean because the return
-/// value is meant to be used as a flag.
+/// Returns true if the string matches
+/// 'all enemies' literally. 
 #[inline]
 pub fn targets_all_enemies(s : &str) -> bool {
     return s == "all enemies" || s == "all enemies'";
@@ -270,7 +268,6 @@ pub fn get_stun_effect(s : &mut String, advance : bool) -> EffectChance
                               eff: targets_all };
 
     }
-
     return EffectChance { eff_chance: 0, eff_turn_count: 0, eff: EffectFlag::NONE };
 }
 
@@ -331,27 +328,28 @@ pub fn get_seal_effect(s : &mut String, advance : bool) -> EffectChance
 /// Parses conditional statements.
 fn parse_condition(s : &mut String) -> EffectCondition
 {
-    let mut previous_token = String::new();
     let mut effect_condition = EffectCondition::default();
-
 
     let num_of_tokens = tokenizer::get_number_of_tokens(&s);
     for _ in 0..num_of_tokens {
         let token = tokenizer::get_next_token(s, true).expect("Failed to retrieve next token");
         
-        if token.1 == tokenizer::Token::Keyword(tokenizer::TokenKeywordType::Conditional) {
-            let conditional_token_type = tokenizer::get_conditional_token_type(&token.0)
-                                                                          .expect("Failed to retrieve conditional token type");
-            
-            if conditional_token_type == tokenizer::ConditionalTokenType::Comparator {                                                    
-                effect_condition.condition |= tokenizer::convert_token_str_to_comparsion_flag(&token.0)
-                                                        .expect("Failed to convert token to a comparsion flag");
+        if token.1 == tokenizer::Token::Keyword {
+            let token_keyword_category = tokenizer::get_token_keyword_category(&token).expect(invalid_token(token.1));
+            if token_keyword_category == tokenizer::TokenKeywordType::Conditional {
+                let conditional_token_type = tokenizer::get_conditional_token_type(&token.0)
+                                                                              .expect("Failed to retrieve conditional token type");
+                
+                if conditional_token_type == tokenizer::ConditionalTokenType::Comparator {                                                    
+                    effect_condition.condition |= tokenizer::convert_token_str_to_comparsion_flag(&token.0)
+                                                             .expect("Failed to convert token to a comparsion flag");
+                }
             }
+
         }
         else if token.1 == tokenizer::Token::Number {
             effect_condition.condition_num = tokenizer::get_token_as_num(&token.0).expect("Failed to convert token to number");
         }
-        previous_token = token.0;
     }
 
     return effect_condition;
@@ -366,21 +364,28 @@ fn parse_stats(s : &mut String, effect : &mut Effect) -> Option<()>
     let num_of_tokens = tokenizer::get_number_of_tokens(&s);
     for _ in 0..num_of_tokens {
         let token = tokenizer::get_next_token(s, true)?;
+        
+        if tokenizer::is_skippable_token(&token) {
+            continue;
+        }
 
-        if token.1 == tokenizer::Token::Keyword(tokenizer::TokenKeywordType::Stat) {
+        if token.1 == tokenizer::Token::Keyword {
+            let token_keyword_category = tokenizer::get_token_keyword_category(&token).expect(invalid_token(token.1));
+            if token_keyword_category == tokenizer::TokenKeywordType::Stat {
                 effect.stats |= flags::convert_str_to_stat_flag(&token.0);
+            }
+            else if token_keyword_category == tokenizer::TokenKeywordType::Conditional {
+                parse_condition(s);
+            }
         }
-        else if token.1 == tokenizer::Token::Keyword(tokenizer::TokenKeywordType::Conditional) {
-            parse_condition(s); 
-        }
-        else if mem::discriminant(&token.1) == mem::discriminant(&tokenizer::Token::Op(tokenizer::TokenOpType::Generic)) {
-            op_modifier |= flags::convert_str_to_op_flag(&token.0);
+        else if token.1 == tokenizer::Token::Op {
+            let token_op_category = tokenizer::get_token_operator_category(&token).expect(invalid_token(token.1));
+            if token_op_category == tokenizer::TokenOpType::Modifier || token_op_category == tokenizer::TokenOpType::Percentage {
+                op_modifier |= flags::convert_str_to_op_flag(&token.0);
+            }
         }
         else if token.1 == tokenizer::Token::Number {
             effect.modifier_num = tokenizer::get_token_as_num(s).expect("Failed to convert token to number");
-        }
-        if tokenizer::is_skippable_token(&token) {
-            continue;
         }
     }
 
@@ -393,8 +398,11 @@ pub fn parse_effect(mut s : String) -> Effect
     let num_of_tokens = tokenizer::get_number_of_tokens(&s);
     for _ in 0..num_of_tokens {
         let token = tokenizer::get_next_token(&mut s, false).expect("Failed to retrieve next token");
-        if token.1 == tokenizer::Token::Keyword(tokenizer::TokenKeywordType::Stat) {
-            parse_stats(&mut s, &mut effect).expect("This error should be impossible to see, should you encounter this please file a bug report");
+        if token.1 == tokenizer::Token::Keyword {
+            let token_keyword_category = tokenizer::get_token_keyword_category(&token).expect(invalid_token(token.1));
+            if token_keyword_category == tokenizer::TokenKeywordType::Stat {
+                parse_stats(&mut s, &mut effect).expect("This error should be impossible to see, should you encounter this please file a bug report");
+            }
         }
     }
     return effect;
