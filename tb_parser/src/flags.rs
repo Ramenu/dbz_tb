@@ -47,7 +47,6 @@ bitflags!
         const DEF = 0x2;
         const HP = 0x4;
         const KI = 0x8;
-        const FLAT_BOOST = 0x10;
     }
 
     #[wasm_bindgen]
@@ -64,7 +63,7 @@ bitflags!
 
     #[wasm_bindgen]
     #[derive(Default)]
-    pub struct OpFlag : u32
+    pub struct OpModifierFlag : u32
     {
         const NONE = 0x0;
         const PLUS = 0x1;
@@ -73,13 +72,13 @@ bitflags!
     }
 }
 
-pub fn convert_str_to_op_flag(s : &str) -> OpFlag
+pub fn convert_str_to_op_modifier_flag(s : &str) -> OpModifierFlag
 {
     return match s {
-        "+" => OpFlag::PLUS,
-        "-" => OpFlag::MINUS,
-        "%" => OpFlag::PERCENTAGE,
-        _ => OpFlag::NONE
+        "+" => OpModifierFlag::PLUS,
+        "-" => OpModifierFlag::MINUS,
+        "%" => OpModifierFlag::PERCENTAGE,
+        _ => OpModifierFlag::NONE
     };
 }
 
