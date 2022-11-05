@@ -4,6 +4,17 @@ use wasm_bindgen::prelude::wasm_bindgen;
 pub const INC_OR_DEC_MODIFIER_PERCENTAGE : f32 = 1.3;
 pub const GREATLY_INC_OR_DEC_MODIFIER_PERCENTAGE : f32 = 1.5;
 
+ pub const SUPER_STR : TypeFlag = TypeFlag::SUPER.union(TypeFlag::STR);
+ pub const SUPER_AGL : TypeFlag = TypeFlag::SUPER.union(TypeFlag::AGL);
+ pub const SUPER_TEQ : TypeFlag = TypeFlag::SUPER.union(TypeFlag::TEQ);
+ pub const SUPER_INT : TypeFlag = TypeFlag::SUPER.union(TypeFlag::INT);
+ pub const SUPER_PHY : TypeFlag = TypeFlag::SUPER.union(TypeFlag::PHY);
+ pub const EXTREME_STR : TypeFlag = TypeFlag::EXTREME.union(TypeFlag::STR);
+ pub const EXTREME_AGL : TypeFlag = TypeFlag::EXTREME.union(TypeFlag::AGL);
+ pub const EXTREME_TEQ : TypeFlag = TypeFlag::EXTREME.union(TypeFlag::TEQ);
+ pub const EXTREME_INT : TypeFlag = TypeFlag::EXTREME.union(TypeFlag::INT);
+ pub const EXTREME_PHY : TypeFlag = TypeFlag::EXTREME.union(TypeFlag::PHY);
+ pub const ALL_TYPES : TypeFlag = TypeFlag::STR.union(TypeFlag::AGL.union(TypeFlag::TEQ.union(TypeFlag::INT.union(TypeFlag::PHY))));
 
 bitflags! 
 {
@@ -104,6 +115,7 @@ pub fn convert_str_to_type_flag(s : &str) -> TypeFlag
         "teq" => TypeFlag::TEQ,
         "phy" => TypeFlag::PHY,
         "int" => TypeFlag::INT,
+        "all" => TypeFlag::STR|TypeFlag::AGL|TypeFlag::TEQ|TypeFlag::PHY|TypeFlag::INT,
         _ => TypeFlag::NONE
     };
 }
