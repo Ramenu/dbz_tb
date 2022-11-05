@@ -394,7 +394,13 @@ pub fn test_leader_skill_parsing()
                                           0.0,
                                           vec![],
                                           OpModifierFlag::NONE,
-                                          Effect{op_modifier_flag: OpModifierFlag::PLUS, stats: StatFlag::KI, condition: EffectCondition { flag_condition: ConditionFlag::IF_EQUAL|ConditionFlag::IF_ABOVE|ConditionFlag::PERCENTAGE, condition_num: 50.0}, modifier_num: 1})
+                                          Effect{op_modifier_flag: OpModifierFlag::PLUS, stats: StatFlag::KI, condition: EffectCondition { flag_condition: ConditionFlag::IF_EQUAL|ConditionFlag::IF_ABOVE|ConditionFlag::PERCENTAGE, condition_num: 50.0}, modifier_num: 1}),
+        
+        ("all type ki +1", StatFlag::KI,
+                           1.0,
+                           vec![STR_INDEX, AGL_INDEX, TEQ_INDEX, INT_INDEX, PHY_INDEX],
+                           OpModifierFlag::PLUS,
+                           Effect{op_modifier_flag: OpModifierFlag::NONE, stats: StatFlag::NONE, condition: EffectCondition { flag_condition: ConditionFlag::NONE, condition_num: 0.0}, modifier_num: 0})
     ];
 
     for ls in leader_skills {
@@ -418,7 +424,8 @@ pub fn test_leader_skill_parsing()
 pub fn test_passive_skill_parsing()
 {
     let passive_skills = [
-        ("ki +2 when hp is 50% or above", Effect{op_modifier_flag: OpModifierFlag::PLUS, stats: StatFlag::KI, condition: EffectCondition { flag_condition: ConditionFlag::IF_EQUAL|ConditionFlag::IF_ABOVE|ConditionFlag::PERCENTAGE, condition_num: 50.0}, modifier_num: 2})
+        ("ki +2 when hp is 50% or above", Effect{op_modifier_flag: OpModifierFlag::PLUS, stats: StatFlag::KI, condition: EffectCondition { flag_condition: ConditionFlag::IF_EQUAL|ConditionFlag::IF_ABOVE|ConditionFlag::PERCENTAGE, condition_num: 50.0}, modifier_num: 2}),
+        ("atk +15% when hp is 50% or above", Effect{op_modifier_flag: OpModifierFlag::PLUS|OpModifierFlag::PERCENTAGE, stats: StatFlag::ATK, condition: EffectCondition { flag_condition: ConditionFlag::IF_EQUAL|ConditionFlag::IF_ABOVE|ConditionFlag::PERCENTAGE, condition_num: 50.0}, modifier_num: 15})
     ];
 
     for passive_skill in passive_skills {

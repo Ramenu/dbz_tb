@@ -31,6 +31,7 @@ pub const EXTREME_AGL_INDEX : usize = 13;
 pub const EXTREME_TEQ_INDEX : usize = 14;
 pub const EXTREME_INT_INDEX : usize = 15;
 pub const EXTREME_PHY_INDEX : usize = 16;
+pub const ALL_TYPES_INDEX : usize = 999;
 
 #[wasm_bindgen]
 #[derive(Default)]
@@ -61,8 +62,13 @@ enum Callback
 /// and the stats. 
 pub fn parse_leader_skill_stat_boosts(leader_skill : &mut String, info : &mut [TypeBoost; 17], advance : bool) -> Option<()>
 {
+    use flags::TypeFlag;
+    // Rust does not allow non-literal patterns, apparently its because of the intrisic way of how pattern matching works,
+    // so we have to create seperate variables for each type combination
+   
+
     lazy_static::lazy_static! {
-        static ref TYPE_LEADER_SKILL_BOOST_RE : Regex = Regex::new(r"(agl|int|phy|str|teq)?,? ?(agl|int|phy|str|teq)?,? ?(?:&|and)? ?(agl|int|phy|str|teq) type (atk|def|hp|ki) \+ ?([0-9]+%?)")
+        static ref TYPE_LEADER_SKILL_BOOST_RE : Regex = Regex::new(r"(agl|int|phy|str|teq)?,? ?(agl|int|phy|str|teq)?,? ?(?:&|and)? ?(all|agl|int|phy|str|teq) type (atk|def|hp|ki) \+ ?([0-9]+%?)")
                                                                .expect("Failed to compile regex");
     }
     let mut indexes : Vec<usize> = Vec::new();
@@ -74,26 +80,36 @@ pub fn parse_leader_skill_stat_boosts(leader_skill : &mut String, info : &mut [T
 
             if type_flag != flags::TypeFlag::NONE {
                 let index = match type_flag {
-                    flags::TypeFlag::STR => STR_INDEX,
-                    flags::TypeFlag::AGL => AGL_INDEX,
-                    flags::TypeFlag::TEQ => TEQ_INDEX,
-                    flags::TypeFlag::INT => INT_INDEX,
-                    flags::TypeFlag::PHY => PHY_INDEX,
-                    flags::TypeFlag::SUPER => SUPER_INDEX,
-                    flags::TypeFlag::SUPER|flags::TypeFlag::STR => SUPER_STR_INDEX,
-                    flags::TypeFlag::SUPER|flags::TypeFlag::AGL => SUPER_AGL_INDEX,
-                    flags::TypeFlag::SUPER|flags::TypeFlag::TEQ => SUPER_TEQ_INDEX,
-                    flags::TypeFlag::SUPER|flags::TypeFlag::INT => SUPER_INT_INDEX,
-                    flags::TypeFlag::SUPER|flags::TypeFlag::PHY => SUPER_PHY_INDEX,
-                    flags::TypeFlag::EXTREME => EXTREME_INDEX,
-                    flags::TypeFlag::EXTREME|flags::TypeFlag::STR => EXTREME_STR_INDEX,
-                    flags::TypeFlag::EXTREME|flags::TypeFlag::AGL => EXTREME_AGL_INDEX,
-                    flags::TypeFlag::EXTREME|flags::TypeFlag::TEQ => EXTREME_TEQ_INDEX,
-                    flags::TypeFlag::EXTREME|flags::TypeFlag::INT => EXTREME_INT_INDEX,
-                    flags::TypeFlag::EXTREME|flags::TypeFlag::PHY => EXTREME_PHY_INDEX,
-                    _ => panic!("Invalid flag or missing combination found, if you see this error, file a bug report")
+                    TypeFlag::STR => STR_INDEX,
+                    TypeFlag::AGL => AGL_INDEX,
+                    TypeFlag::TEQ => TEQ_INDEX,
+                    TypeFlag::INT => INT_INDEX,
+                    TypeFlag::PHY => PHY_INDEX,
+                    TypeFlag::SUPER => SUPER_INDEX,
+                    flags::SUPER_STR => SUPER_STR_INDEX,
+                    flags::SUPER_AGL=> SUPER_AGL_INDEX,
+                    flags::SUPER_TEQ => SUPER_TEQ_INDEX,
+                    flags::SUPER_INT => SUPER_INT_INDEX,
+                    flags::SUPER_PHY => SUPER_PHY_INDEX,
+                    TypeFlag::EXTREME => EXTREME_INDEX,
+                    flags::EXTREME_STR => EXTREME_STR_INDEX,
+                    flags::EXTREME_AGL => EXTREME_AGL_INDEX,
+                    flags::EXTREME_TEQ => EXTREME_TEQ_INDEX,
+                    flags::EXTREME_INT => EXTREME_INT_INDEX,
+                    flags::EXTREME_PHY => EXTREME_PHY_INDEX,
+                    flags::ALL_TYPES => ALL_TYPES_INDEX,
+                    _ => unreachable!()
                 };
-                indexes.push(index);
+
+                if index == ALL_TYPES_INDEX {
+                    indexes.push(STR_INDEX);
+                    indexes.push(AGL_INDEX);
+                    indexes.push(TEQ_INDEX);
+                    indexes.push(INT_INDEX);
+                    indexes.push(PHY_INDEX);
+                } else {
+                    indexes.push(index);
+                }
                 continue;
             }
             let stat = flags::convert_str_to_stat_flag(capture_str);
